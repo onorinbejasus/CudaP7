@@ -1,0 +1,19 @@
+# open gl headers
+#GLUT_PATH = /usr/include/FL
+#GLUT_LIB = /usr/lib64/libglut.so.3
+#GL_H_PATH = /usr/include/GL
+GLUT_LIB_PATH = /afs/cs/academic/class/15668-s11/lib
+
+# cuda headers and library paths
+CUDA_H_PATH = /usr/local/cs/cuda/include
+CUDA_LIB_PATH = /usr/local/cs/cuda/lib64
+CUTIL_H_PATH = /usr/local/cs/cuda/C/common/inc
+CUTIL_LIB_PATH = /usr/local/cs/cuda/C/lib
+CUDA_GL_PATH = /usr/local/cs/cuda/shared/inc/GL
+
+# gcc compiler linker flags
+GCC_CFLAGS = -O3
+GCC_LFLAGS = -I$(CUDA_GL_PATH) -L$(GLUT_LIB_PATH) -lGL -lglut -lGLEW -lpng
+
+# nvcc compiler/linker flags
+NVCC_CFLAGS = -m64 -I$(CUDA_H_PATH) -I$(CUTIL_H_PATH) -L$(CUDA_LIB_PATH) -L$(CUTIL_LIB_PATH) -lcuda -lcudart -lcutil_x86_64 -Xcompiler $(GCC_CFLAGS) $(GCC_LFLAGS)

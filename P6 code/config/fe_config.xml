@@ -1,0 +1,45 @@
+<cloud>
+<frontend_settings>
+
+    <!-- Display settings -->
+    <window_width> 512 </window_width>
+    <window_height> 512 </window_height>
+    <phony_mode>  0    </phony_mode>
+
+    <!-- Stage settings -->
+    <num_decompressors> 2 </num_decompressors>
+
+    <!-- Framerate settings -->
+    <frames_in_flight>  4   </frames_in_flight>
+    <target_framerate>  3000  </target_framerate>
+
+    <!-- Fluid settings -->
+    <rendering_fluid>   1  </rendering_fluid> 
+    <enable_user_input>  0  </enable_user_input>
+
+    <!-- Models and textures -->
+    <maple_shadow>      		/lustre/cloud/textures/frontend_env/textures/mapleShadow_dark_trans.png             </maple_shadow>
+    <chestnut_shadow>   		/lustre/cloud/textures/frontend_env/textures/chestnutShadow_dark_trans75_blur.png   </chestnut_shadow>
+    <oak_shadow>        		/lustre/cloud/textures/frontend_env/textures/oakShadow_dark_trans75_blur.png        </oak_shadow>
+    <plum_shadow>       		/lustre/cloud/textures/frontend_env/textures/plumShadow_dark_trans.png              </plum_shadow>
+    <maple_dark_shadow> 		/lustre/cloud/textures/frontend_env/textures/mapleShadow_dark_trans.png             </maple_dark_shadow> 
+    <env_grid_model>    		/lustre/cloud/textures/frontend_env/models/grid.obj                                 </env_grid_model>
+    <env_shadow_plane_model>    /lustre/cloud/textures/frontend_env/models/shadow_plane.obj         		        </env_shadow_plane_model>
+    <env_grid_texture>  		/lustre/cloud/textures/frontend_env/textures/grid.png                               </env_grid_texture>
+    <fluid_smoke_texture>  		/lustre/cloud/textures/fluid_tex/gaus2d-10.png                                      </fluid_smoke_texture>
+
+
+    <!-- List of objects in the scene -->  
+    
+    <geometry_settings>
+      <translation>   0.0, 0.0, 0.0   </translation>
+      <theta>         0.0                       </theta> 
+      <bounding_box>  12.0, 12.0, 12.0           </bounding_box>
+      <backend_id>    0                       </backend_id>
+      <type_id>       0                       </type_id>
+      <type_name>     chestnut_545               </type_name>
+    </geometry_settings>
+    
+</frontend_settings>
+</cloud>
+

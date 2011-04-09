@@ -1,0 +1,36 @@
+1218332480 Core 110407-193914 714165, src/common/log.cpp:76, log_init:
+	[INFO] log_init: Logger Initialized.
+1218332480 Frontend 110407-193914 772588, src/frontend/frontplane.cpp:197, start:
+	[INFO] Starting frontplane
+1218332480 Frontend 110407-193914 774090, src/frontend/frontplane.cpp:222, start:
+	[INFO] queues created...
+1218332480 Network 110407-193914 774139, src/common/network/socket.cpp:349, general_init:
+	[INFO] Creating network manager with max conn = 1 and max packet len = 5242816
+1218332480 Frontend 110407-193914 774287, src/frontend/frontplane.cpp:263, start:
+	[INFO] stages created, launching threads...
+946366208 Pipeline 110407-193914 774537, ./src/common/pipeline/pipeline.hpp:76, run:
+	[INFO] starting pipeline stage 'N3aed8frontend5stage12DecompressorE'
+979937024 Pipeline 110407-193914 774572, ./src/common/pipeline/pipeline.hpp:76, run:
+	[INFO] starting pipeline stage 'N3aed8frontend5stage8AnalyzerE'
+979937024 Network 110407-193914 774598, src/common/network/socket.cpp:175, connect_to:
+	[INFO] Conecting to 'Tim' on port 1234.
+971544320 Pipeline 110407-193914 775322, ./src/common/pipeline/pipeline.hpp:76, run:
+	[INFO] starting pipeline stage 'N3aed8frontend5stage10CompositorE'
+954758912 Pipeline 110407-193914 775865, ./src/common/pipeline/pipeline.hpp:76, run:
+	[INFO] starting pipeline stage 'N3aed8frontend5stage12DecompressorE'
+971544320 Frontend 110407-193914 854191, src/frontend/render/shader.cpp:236, init_shader:
+	[INFO] The Shader is 1
+971544320 Frontend 110407-193914 854264, src/frontend/render/shader.cpp:239, init_shader:
+	[INFO] Loading vertex shader  :shaders/compositor_vert.glsl.
+971544320 Frontend 110407-193914 854281, src/frontend/render/shader.cpp:240, init_shader:
+	[INFO] Loading fragment shader:shaders/compositor_frag.glsl.
+971544320 Frontend 110407-193914 863705, src/frontend/render/shader.cpp:112, load_shader:
+	[INFO] Compiled shaders successfully
+971544320 Frontend 110407-193914 864626, src/frontend/render/shader.cpp:112, load_shader:
+	[INFO] Compiled shaders successfully
+971544320 Frontend 110407-193914 874468, src/frontend/render/shader.cpp:258, init_shader:
+	[INFO] Successfully linked shader
+971544320 Frontend 110407-193914 875560, src/frontend/stage/compositor.cpp:52, initialize:
+	[INFO] Compositor: Window initialized 
+971544320 Frontend 110407-193914 878880, src/frontend/stage/compositor.cpp:71, initialize:
+	[INFO] Compositor: Initialization complete.

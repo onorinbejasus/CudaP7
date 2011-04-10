@@ -1,17 +1,15 @@
 // TinkerToy.cpp : Defines the entry point for the console application.
 
-#include "Particle.h"
-#include "Constraint.h"
-#include "imageio.h"
-#include "Sphere.h"
-
+#include "Particle.hh"
+#include "Constraint.hh"
+#include "imageio.hh"
 
 #include <vector>
 #include <stdlib.h>
 #include <stdio.h>
 #include "open_gl.hh"
 
-#include <math.h>
+#include <cmath>
 
 /* colors */
 
@@ -25,30 +23,28 @@
 #define GREY    7
 #define WHITE   8
 
-#define MAXSAMPLES 15
+#define MAXSAMPLES 100
 
 /* external definitions (from solver) */
 
-extern void verlet_simulation_step(std::vector<struct Particle*> pVector, std::vector<struct Constraint*> constraints, Shape *shape);
+extern void verlet_simulation_step(struct Particle* pVector, struct Constraint* constraints, int size, int num_con);
 	
 /* global variables */
 
-static int N;
-static float d;
 static int dsim;
-
-// static Particle *pList;
-static std::vector<struct Particle*> pVector;
-static std::vector<struct Constraint*> constraints;
-static std::vector<Shape*> shapes;
 
 static int win_id;
 static int win_x, win_y;
 
-static int row	  = 35;
-static int column = 35;
+static int row	  = 19;
+static int column = 19;
+
+static struct Particle* pVector;
+static struct Constraint* constraints;
 
 static int size = row * column;
+static int c_size = ( ( (column-1) * row ) + ( (row - 1) * column ) + 2 * ( (row - 1) * (column - 1) )  
+								+ ( (column/2) * row ) + ( (row/2) * column ) + 5 * ( ceil(column/2.0) * (row-2) ) );
 
 static int width = 1;
 static int height = 1;
@@ -56,11 +52,17 @@ static int height = 1;
 static int x_camera = 0, y_camera = 0, z_camera = 10;
 static int lookAtX = 0, lookAtY = 0, lookAtZ = -1;
 
-static bool visible = false;
-
 /* spring constants */
 
-Particle *getParticle(int x, int y){ return pVector[y*row+x]; }
+struct Particle *getParticle(int x, int y){ return &pVector[y*row+x]; }
+
+/* find the normal of a triangle */
+
+float3 triangle_normal(float3 v1, float3 v2, float3 v3){
+	
+	float3 temp = cross(v2-v1, v3-v1);
+	return normalize(temp);
+}
 
 /*----------------------------------------------------------------------
 free/clear/allocate simulation data
@@ -68,16 +70,16 @@ free/clear/allocate simulation data
 
 static void free_data ( void )
 {
-	pVector.clear(); // empty particles
-	constraints.clear(); // empty constraints
+	free(pVector);
+	free(constraints); // empty constraints
 }
 
 static void clear_data ( void )
 {
-	int ii, size = pVector.size();
+	int ii;
 
 	for(ii=0; ii<size; ii++){
-		pVector[ii]->reset();
+		pVector[ii].reset();
 	}
 }
 
@@ -89,11 +91,11 @@ static void make_particles(void)
 	for(int i = 0; i < row; i++){
 		for(int j = 0; j < column; j++){
 			
-			float3 pos = float3(width * (i/(float)row), 0, -height * (j/(float)column));
+			float3 pos = make_float3(width * (i/(float)row), 0, -height * (j/(float)column));
 			if(j == 0)
-				pVector[j * row + i] = new Particle (pos, 1, false);
+				pVector[j * row + i] = Particle (pos, 1, false);
 			else
-				pVector[j * row + i] = new Particle (pos, 1, true);
+				pVector[j * row + i] = Particle (pos, 1, true);
 		}
 	}
 	
@@ -105,6 +107,8 @@ static void make_particles(void)
 
 void make_constraints(void){
 	
+	int index = 0;
+	
 	for(int ii = 0; ii < row; ii++){
 		
 		for(int jj = 0; jj < column; jj++){
@@ -112,32 +116,34 @@ void make_constraints(void){
 			/* neighbors */
 						
 			if(ii < row-1) // to the right
-				constraints.push_back(new Constraint(getParticle(ii,jj), getParticle(ii+1, jj)) );
+				constraints[index++] = Constraint(getParticle(ii,jj), getParticle(ii+1, jj) );
 			
 			if(jj < column -1) // below	
-				constraints.push_back(new Constraint(getParticle(ii,jj), getParticle(ii,jj+1) ) );
+				constraints[index++] = Constraint(getParticle(ii,jj), getParticle(ii,jj+1) );
 			
 			if(ii < row-1 && jj < column -1) // down right
-				constraints.push_back(new Constraint(getParticle(ii,jj), getParticle(ii+1,jj+1) ) );
+				constraints[index++] = Constraint(getParticle(ii,jj), getParticle(ii+1,jj+1) );
 			
 			if(ii < row-1 && jj < column -1) // up right	
-				constraints.push_back( new Constraint(getParticle(ii+1,jj), getParticle(ii,jj+1) ) );
+				constraints[index++] = Constraint(getParticle(ii+1,jj), getParticle(ii,jj+1) );
 			
 			/* neighbor's neighbors */
 			
 		 	if(ii < row-2) // to the right
-				constraints.push_back(new Constraint(getParticle(ii,jj), getParticle(ii+2, jj) ) );
+				constraints[index++] = Constraint(getParticle(ii,jj), getParticle(ii+2, jj) );
 			
 			if(jj < column -2) // below	
-				constraints.push_back(new Constraint(getParticle(ii,jj), getParticle(ii,jj+2) ) );
+				constraints[index++] = Constraint(getParticle(ii,jj), getParticle(ii,jj+2) );
 			
 			if(ii < row-2 && jj < column -2) // down right
-				constraints.push_back(new Constraint(getParticle(ii,jj), getParticle(ii+2,jj+2) ) );
+				constraints[index++] = Constraint(getParticle(ii,jj), getParticle(ii+2,jj+2) );
 			
 			if(ii < row-2 && jj < column -2) // up right	
-				constraints.push_back( new Constraint(getParticle(ii+2,jj), getParticle(ii,jj+2) ) );
+				constraints[index++] = Constraint(getParticle(ii+2,jj), getParticle(ii,jj+2) );
 		}	
-	}	
+	}
+	
+	printf("constraints: %i\n", index);	
 }
 
 /*--------------------------------------------------------------------
@@ -185,18 +191,11 @@ void calculate_normals(){
 
 static void init_system(void)
 {
+	pVector = (struct Particle*)malloc(size * sizeof(struct Particle));
+	constraints = (struct Constraint*)malloc(c_size * sizeof(struct Constraint));
 	
-	// Create three particles, attach them to each other, then add a
-	// circular wire constraint to the first.
-		pVector.resize(size);
-		
-		float3 sphere_center = make_float3(0.5f, -0.75f, 0.0f);
-		float radius = 0.25f;
-		
-		shapes.push_back(new Sphere(radius, sphere_center, 0));
-		
-		make_particles(); // create particles
-		make_constraints(); // create constraints
+	make_particles(); // create particles
+	make_constraints(); // create constraints
 }
 
 /*--------------------------------------------------------------------
@@ -205,11 +204,9 @@ static void init_system(void)
 
 static void draw_particles ( void )
 {
-	int size = pVector.size();
-
 	for(int ii=0; ii< size; ii++)
 	{
-		pVector[ii]->draw();
+		pVector[ii].draw();
 	}
 }
 
@@ -225,10 +222,11 @@ relates mouse movements to tinker toy construction
 
 static void remap_GUI()
 {	
-	int ii, size = pVector.size();
+	int ii;
+	
 	for(ii=0; ii<size; ii++)
 	{
-		pVector[ii]->reset();
+		pVector[ii].reset();
 	}
 }
 
@@ -248,45 +246,13 @@ static void key_func ( unsigned char key, int x, int y )
 		dsim = !dsim;
 		break;	
 		
-	case 'd': // move right
-	case 'D':
-		shapes[0]->m_position[0] += 0.1;
-		break;
-	case 'a': // move left
-	case 'A':
-		shapes[0]->m_position[0] -= 0.1;
-		break;
-	
-	case 'w': // move up
-	case 'W':
-		shapes[0]->m_position[1] += 0.1;
-		break;
-	case 's': // move down
-	case 'S':
-		shapes[0]->m_position[1] -= 0.1;
-		break;
-	
-	case 'z': // move in
-		shapes[0]->m_position[2] -= 0.1;
-		break;
-	case 'Z': // move out
-		shapes[0]->m_position[2] += 0.1;
-		break;
-	
-	case 'v': // turn visible sphere on or off
-	case 'V':
-		visible = !visible;
-		break;
-	
 	case 'q':
 	case 'Q':
 	case 27:
 		free_data ();
 		exit ( 0 );
 		break;
-
-
-	
+			
 	default:
 		break;
 	} // end switch
@@ -311,7 +277,7 @@ static void reshape_func ( int width, int height )
 static void step_func ( )
 {
 	if ( dsim )
-		verlet_simulation_step(pVector, constraints, shapes[0]);
+		verlet_simulation_step(pVector, constraints, size, c_size);
 	
 	else {remap_GUI();}
 
@@ -336,8 +302,8 @@ static void display_func ( void )
 	draw_forces();
 	draw_particles();
 
-	if(visible)
-		shapes[0]->draw();
+//	if(visible)
+//		shapes[0]->draw();
 
 	glutSwapBuffers ();
 	
@@ -380,15 +346,8 @@ static void open_glut_window ( void )
 int main ( int argc, char ** argv )
 {
 	glutInit ( &argc, argv );
-
-	if ( argc == 1 ) {
-		N = 64;
-		d = 5.f;
-		
-	} else {
-		N = atoi(argv[1]);
-		d = atof(argv[3]);
-	}
+	
+	printf("constraints init: %i\n", c_size);
 	
 	init_system();
 	

@@ -8,7 +8,7 @@
 
 #pragma once
 
-#include "Particle.h"
+#include "Particle.hh"
 #include "cmath"
 #include "open_gl.hh"
 #include "cuda_err.hh"
@@ -26,7 +26,7 @@ __device__ __host__
 	Constraint(struct Particle *part1, struct Particle *part2) : p1(part1), p2(part2){
 
 		float3 diff = part2->m_Position - part1->m_Position;
-		m_rest = sqrt(diff * diff);
+		m_rest = length(diff);
 	}
 	
 __device__ __host__	
@@ -34,10 +34,10 @@ __device__ __host__
 
 		/* check distance between particles against rest distance, then correct */ 
 
-		Vec3f p1_to_p2 = p2->m_Position - p1->m_Position; 
-		float current_distance = sqrt(p1_to_p2 * p1_to_p2);
-		Vec3f correctionVector = p1_to_p2*(1 - m_rest/current_distance); 
-		Vec3f correctionVectorHalf = correctionVector*0.5; 
+		float3 p1_to_p2 = p2->m_Position - p1->m_Position; 
+		float current_distance = length(p1_to_p2);
+		float3 correctionVector = p1_to_p2*(1 - m_rest/current_distance); 
+		float3 correctionVectorHalf = correctionVector*0.5; 
 
 		if(current_distance > m_rest){
 

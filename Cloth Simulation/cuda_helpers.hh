@@ -2,6 +2,7 @@
 #define CUDA_HELPERS_HH
 
 #include <cutil_math.h>
+#include "cuda_helpers.hh"
 
 typedef unsigned int uint;
 typedef unsigned short ushort;

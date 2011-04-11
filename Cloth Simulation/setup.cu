@@ -76,8 +76,7 @@ void make_particles(struct Particle *pVector, float4 *data_pointer, int row, int
 	
 	float3 pos = make_float3(width * (i/(float)row), -height * (j/(float)column), 0);
 	
-	//if((j == 0 && i == 0) || (i == 0 && j == column-1))
-	if(j == 0)	
+	if((j == 0 && i == 0) || (i == 0 && j == column-1))
 		pVector[getParticleInd(i,j,row)] = Particle(pos, 1, data_pointer, getParticleInd(i,j, row), false);
 	else
 		pVector[getParticleInd(i,j,row)] = Particle(pos, 1, data_pointer, getParticleInd(i,j, row), true);

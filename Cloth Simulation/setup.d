@@ -38,6 +38,7 @@ setup.o : setup.cu \
     /usr/include/stdlib.h \
     imageio.hh \
     /usr/include/AvailabilityMacros.h \
+    /Developer/GPU\ Computing/C/common/inc/cutil.h \
     /usr/include/sys/_structs.h \
     /usr/include/_structs.h \
     /usr/include/sys/select.h \
@@ -66,6 +67,7 @@ setup.o : setup.cu \
     /usr/local/cuda/bin/../include/host_config.h \
     /usr/include/c++/4.2.1/i686-apple-darwin10/bits/cpu_defines.h \
     /usr/local/cuda/bin/../include/sm_12_atomic_functions.h \
+    /usr/local/cuda/bin/../include/cuda_gl_interop.h \
     /Developer/GPU\ Computing/C/common/inc/cutil_math.h \
     /usr/include/sys/appleapiopts.h \
     /usr/include/sys/syslimits.h \

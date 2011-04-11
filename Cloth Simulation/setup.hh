@@ -7,8 +7,6 @@
 // 
 
 void free_data(void);
-void clear_data(void);
-void calculate_normals();
 void draw_particles(void);
 void draw_forces(void);
 void step_func();

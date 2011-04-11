@@ -66,6 +66,7 @@ window.o : window.cc \
     /System/Library/Frameworks/GLUT.framework/Headers/glut.h \
     /usr/include/machine/_types.h \
     /usr/include/i386/_types.h \
+    Shaders.h \
     /usr/lib/gcc/i686-apple-darwin10/4.2.1/include/stddef.h \
     /usr/local/cuda/bin/../include/device_types.h \
     /System/Library/Frameworks/OpenGL.framework/Headers/gl.h

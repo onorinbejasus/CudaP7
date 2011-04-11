@@ -11,10 +11,12 @@
 
 #include "setup.hh"
 
+#include <cutil.h>
+#include <cuda_gl_interop.h>
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <cmath>
-
 
 #define BLACK   0
 #define RED     1
@@ -28,29 +30,27 @@
 
 #define MAXSAMPLES 100
 
-int row	  = 25;
-int column = 25;
+int row	  = 40;
+int column = 40;
 
-int width = 2;
-int height = 2;
+int width = 8;
+int height = 8;
 
 struct Particle* pVector;
 
-struct Particle *draw;
+GLuint vbo;
+float4 *data_pointer;
 
 int size = row * column;
 
-extern void verlet_simulation_step(struct Particle* pVector, int row, int column);
-extern int dsim;
+extern void verlet_simulation_step(struct Particle* pVector, float4 *data_pointer, GLuint vbo, bool wind, int row, int column);
+void deleteVBO(GLuint *vbo);
+extern bool dsim;
+extern bool wind;
+extern GLuint shader;
 
-struct Particle *getParticleCPU(int x, int y) { return &draw[y*row+x]; }
-/* find the normal of a triangle */
-
-float3 triangle_normal(float3 v1, float3 v2, float3 v3){
-	
-	float3 temp = cross(v2-v1, v3-v1);
-	return normalize(temp);
-}
+__device__
+int getParticleInd(int x, int y, int row) { return y*row+x; }
 
 /*----------------------------------------------------------------------
 free/clear/allocate simulation data
@@ -58,72 +58,63 @@ free/clear/allocate simulation data
 void free_data ( void )
 {
 	cudaFree(pVector);
-}
-
-void clear_data ( void )
-{
-	int ii;
-
-	for(ii=0; ii<size; ii++){
-		pVector[ii].reset();
-	}
+	deleteVBO(&vbo);
+	data_pointer = 0;
 }
 
 /*--------------------------------------------------------------------
 					Make Particles
 --------------------------------------------------------------------*/
-void make_particles(struct Particle *pVector)
+__global__
+void make_particles(struct Particle *pVector, float4 *data_pointer, int row, int column, int width, int height)
 {
-	for(int i = 0; i < row; i++){
-		for(int j = 0; j < column; j++){
-			
-			float3 pos = make_float3(width * (i/(float)row), 0, -height * (j/(float)column));
-			if(j == 0)
-				pVector[j * row + i] = Particle (pos, 1, false);
-			else
-				pVector[j * row + i] = Particle (pos, 1, true);
-		}
-	}
+	// //calculate the unique thread index
+	int index = blockIdx.x * blockDim.x + threadIdx.x;
+	// 
+	int i = index%row;
+	int j = index/column;
+	
+	float3 pos = make_float3(width * (i/(float)row), -height * (j/(float)column), 0);
+	
+	//if((j == 0 && i == 0) || (i == 0 && j == column-1))
+	if(j == 0)	
+		pVector[getParticleInd(i,j,row)] = Particle(pos, 1, data_pointer, getParticleInd(i,j, row), false);
+	else
+		pVector[getParticleInd(i,j,row)] = Particle(pos, 1, data_pointer, getParticleInd(i,j, row), true);
 	
 } // end make particles
 
-/*--------------------------------------------------------------------
-					Update Normals
---------------------------------------------------------------------*/
+/*----------------------------------------------------------
+					Create VBO
+----------------------------------------------------------*/
 
-void calculate_normals(){
-	
-	for(int ii = 0; ii < row-1; ii++){
-		
-		for(int jj = 0; jj < column-1; jj++){
-			
-			 // Particle 1 = ii+1, jj
-			// Particle 2 = ii, jj
-			// Particle 3 = ii, jj+1
-			
-			/* calculate normal of triangle */
-			
-			float3 normal = triangle_normal(getParticleCPU(ii+1,jj)->m_Position, getParticleCPU(ii,jj)->m_Position, getParticleCPU(ii,jj+1)->m_Position);
-			
-			/* add component to triangle */
-			
-			getParticleCPU(ii+1,jj)->updateNormal(normal); 
-			getParticleCPU(ii,jj)->updateNormal(normal);
-		 	getParticleCPU(ii+1,jj+1)->updateNormal(normal);
-		
-			/* calculate normal of triangle */
-		
-			normal = triangle_normal(getParticleCPU(ii+1,jj+1)->m_Position, getParticleCPU(ii+1,jj)->m_Position, getParticleCPU(ii,jj+1)->m_Position);
-		
-			/* add component to triangle */
-		
-			getParticleCPU(ii+1,jj+1)->updateNormal(normal);
-			getParticleCPU(ii+1,jj)->updateNormal(normal);
-	 		getParticleCPU(ii,jj+1)->updateNormal(normal);
-		
-		} // end for jj
-	} // end for ii
-	
+void createVBO(GLuint* vbo)
+{
+    // create buffer object
+    glGenBuffers( 1, vbo);
+    glBindBuffer( GL_ARRAY_BUFFER, *vbo);
+
+    // initialize buffer object
+    unsigned int m_size = size * 4 * sizeof( float);
+    glBufferData( GL_ARRAY_BUFFER, m_size, 0, GL_DYNAMIC_DRAW);
+
+    glBindBuffer( GL_ARRAY_BUFFER, 0);
+
+    // register buffer object with CUDA
+    cudaGLRegisterBufferObject(*vbo);
+}
+
+/*----------------------------------------------------------
+					Delete VBO
+----------------------------------------------------------*/
+void deleteVBO( GLuint* vbo)
+{
+    glBindBuffer( 1, *vbo);
+    glDeleteBuffers( 1, vbo);
+
+    cudaGLUnregisterBufferObject(*vbo);
+
+    *vbo = 0;
 }
 
 /*--------------------------------------------------------------------
@@ -131,24 +122,28 @@ void calculate_normals(){
 --------------------------------------------------------------------*/
 
 void init_system(void)
-{	
-	draw = (struct Particle*)malloc(size * sizeof(struct Particle) );
-	
-	/* temporary particle */
-	struct Particle *temp_p;
-	temp_p = (struct Particle*)malloc(size * sizeof(struct Particle) );
-	
+{		
 	/* malloc cuda memory*/
 	cudaMalloc( (void**)&pVector, size * sizeof(struct Particle) );
+		
+	/* initialize VBO */
+	createVBO(&vbo);
+	
+	/* map vbo in cuda */
+	cudaGLMapBufferObject((void**)&data_pointer, vbo);
 	
 	/* create and copy */
 	
-	make_particles(temp_p); // create particles
-	cudaMemcpy(pVector, temp_p, size * sizeof(struct Particle), cudaMemcpyHostToDevice);
+	const int threadsPerBlock = 512;
+	int totalThreads = row * column;
+	int nBlocks = totalThreads/threadsPerBlock;
+	nBlocks += ((totalThreads % threadsPerBlock) > 0) ? 1 : 0;
 	
-	cudaMemcpy(draw, pVector, size * sizeof(struct Particle), cudaMemcpyDeviceToHost);
+	make_particles<<<nBlocks, threadsPerBlock>>>(pVector, data_pointer, row, column, width, height); // create particles
+		
+	/* unmap vbo */
+	cudaGLUnmapBufferObject(vbo);
 	
-	free(temp_p);
 }
 
 /*--------------------------------------------------------------------
@@ -157,10 +152,31 @@ void init_system(void)
 
 void draw_particles ( void )
 {
-	for(int ii=0; ii< size; ii++)
-	{
-		draw[ii].draw();
-	}
+	// render from the vbo
+	glEnable(GL_POINT_SPRITE_ARB);
+    glTexEnvi(GL_POINT_SPRITE_ARB, GL_COORD_REPLACE_ARB, GL_TRUE);
+    glEnable(GL_VERTEX_PROGRAM_POINT_SIZE_NV);
+    glDepthMask(GL_TRUE);
+    glEnable(GL_DEPTH_TEST);
+
+    glUseProgram(shader);
+    glUniform1f( glGetUniformLocation(shader, "pointScale"), 512 / tanf(150*0.5f*(float)M_PI/180.0f) );
+    glUniform1f( glGetUniformLocation(shader, "pointRadius"), 0.02 );
+
+    glColor3f(0, 1, 0);
+
+    glBindBufferARB(GL_ARRAY_BUFFER_ARB, vbo);
+    glVertexPointer(4, GL_FLOAT, 0, 0);
+    glEnableClientState(GL_VERTEX_ARRAY);
+
+	glDrawArrays(GL_POINTS, 0, size);
+
+    glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
+    glDisableClientState(GL_VERTEX_ARRAY); 
+    glDisableClientState(GL_COLOR_ARRAY);
+
+    glUseProgram(0);
+    glDisable(GL_POINT_SPRITE_ARB);
 }
 
 /*--------------------------------------------------------------------
@@ -172,25 +188,42 @@ void draw_forces ( void )
 /*----------------------------------------------------------------------
 relates mouse movements to tinker toy construction
 ----------------------------------------------------------------------*/
-
-void remap_GUI()
+__global__
+void remap_GUI(struct Particle *pVector, float4 *data_pointer)
 {	
-	int ii;
-	
-	for(ii=0; ii<size; ii++)
-	{
-		draw[ii].reset();
-	}
-	
-	cudaMemcpy(pVector, draw, size * sizeof(struct Particle), cudaMemcpyHostToDevice);
+	// //calculate the unique thread index
+	int index = blockIdx.x * blockDim.x + threadIdx.x;
+		
+	pVector[index].reset();
+	data_pointer[index] = make_float4(pVector[index].m_ConstructPos, 1);
 }
 
 void step_func ( )
 {
-	if ( dsim ){
-		verlet_simulation_step(pVector, row, column);
-		
-		cudaMemcpy(draw, pVector, size * sizeof(struct Particle), cudaMemcpyDeviceToHost);
+	if ( dsim ){ // simulate
+		verlet_simulation_step(pVector, data_pointer, vbo, wind, row, column);
 	}
-	else {remap_GUI();}
+	else { // remap
+		
+	// remove old 
+		deleteVBO(&vbo);
+		data_pointer = 0;
+
+		/* initialize VBO */
+		createVBO(&vbo);
+
+		/* map vbo in cuda */
+		cudaGLMapBufferObject((void**)&data_pointer, vbo);
+		
+		const int threadsPerBlock = 512;
+		int totalThreads = row * column;
+		int nBlocks = totalThreads/threadsPerBlock;
+		nBlocks += ((totalThreads % threadsPerBlock) > 0) ? 1 : 0;
+		
+		remap_GUI<<<nBlocks, threadsPerBlock>>>(pVector, data_pointer);
+		
+		/* unmap vbo */
+		cudaGLUnmapBufferObject(vbo);
+		
+	}
 }

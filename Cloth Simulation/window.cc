@@ -3,6 +3,7 @@
 
 // open gl
 #include "open_gl.hh"
+#include "Shaders.h"
 
 // cuda utility libraries
 #include <cuda_runtime.h>
@@ -12,7 +13,7 @@
 #include <cutil_gl_error.h>
 #include <cuda_gl_interop.h>
 #include <cuda.h>
-// #include <rendercheck_gl.h>
+
 #include "setup.hh"
 
 // callbacks
@@ -26,6 +27,44 @@ unsigned int window_width = 512;
 unsigned int window_height = 512;
 
 unsigned int timer = 0; // a timer for FPS calculations
+
+GLuint shader = 0;
+
+/* compile the vertex and fragment shader */
+
+GLuint compileShader(const char *vsource, const char *fsource){
+	
+	GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
+    GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+
+    glShaderSource(vertexShader, 1, &vsource, 0);
+    glShaderSource(fragmentShader, 1, &fsource, 0);
+    
+    glCompileShader(vertexShader);
+    glCompileShader(fragmentShader);
+
+    GLuint program = glCreateProgram();
+
+    glAttachShader(program, vertexShader);
+    glAttachShader(program, fragmentShader);
+
+    glLinkProgram(program);
+
+    // check if program linked
+    GLint success = 0;
+    glGetProgramiv(program, GL_LINK_STATUS, &success);
+
+    if (!success) {
+        char temp[256];
+        glGetProgramInfoLog(program, 256, 0, temp);
+        printf("Failed to link program:\n%s\n", temp);
+        glDeleteProgram(program);
+        program = 0;
+    }
+
+    return program;	
+}
+
 
 // Forward declarations of GL functionality
 CUTBoolean initGL(int argc, char** argv);
@@ -135,6 +174,7 @@ CUTBoolean initGL(int argc, char **argv)
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity() ;  // init modelview to identity
 	
+	shader = compileShader(vertexShader, spherePixelShader);
 	init_system();
 	
 	return CUTTrue;

@@ -15,10 +15,16 @@
 
 struct Particle
 {
- __device__ __host__
-	Particle(const float3 & ConstructPos, float mass, bool move) :
+__device__
+	Particle(){}
+	
+ __device__
+	Particle(const float3 & ConstructPos, float mass, float4 *data_pointer, int index, bool move) :
 			m_ConstructPos(ConstructPos), m_Position(ConstructPos), m_Old(ConstructPos),
-			m_normal(make_float3(0.0f)), m_forces(make_float3(0.0f)), m_mass(mass), m_movable(move) {}	
+			m_normal(make_float3(0.0f)), m_forces(make_float3(0.0f)), m_mass(mass), m_index(index), m_movable(move) {
+				
+				data_pointer[index] = make_float4(m_ConstructPos, 1);
+			}	
 
 __host__
 	void draw()
@@ -39,6 +45,7 @@ __device__ __host__
 	void reset()
 	{
 		m_Position = m_Old = m_ConstructPos;
+		m_normal = make_float3(0.0f);
 		m_forces = make_float3(0.0f);
 	
 	} // resets the position, velocity, and force
@@ -54,10 +61,11 @@ __device__ __host__
 	}
 
 __device__ __host__
-	void updateVector(float3 new_pos){ /* updates the vector position */
+	void updateVector(float3 new_pos, float4 *data_pointer){ /* updates the vector position */
 
 		m_Position += new_pos;
-
+		data_pointer[m_index] = make_float4(m_Position, 1);
+		
 	} // set vector
 
 __device__ __host__	
@@ -80,6 +88,7 @@ __device__
 
 	} // end step
 	
+	uint m_index;
 	float3 m_ConstructPos; // original position
 	float3 m_Position; // current position
 	float3 m_Old; // previous integration position

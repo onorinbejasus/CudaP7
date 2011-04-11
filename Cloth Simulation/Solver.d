@@ -52,6 +52,7 @@ Solver.o : Solver.cu \
     /usr/include/i386/_structs.h \
     /usr/include/stdlib.h \
     /usr/include/AvailabilityMacros.h \
+    /Developer/GPU\ Computing/C/common/inc/cutil.h \
     /usr/include/sys/_structs.h \
     /usr/include/c++/4.2.1/cctype \
     /usr/include/_structs.h \
@@ -85,6 +86,7 @@ Solver.o : Solver.cu \
     /usr/include/c++/4.2.1/cstdio \
     /usr/local/cuda/bin/../include/sm_12_atomic_functions.h \
     /usr/include/c++/4.2.1/bits/stl_bvector.h \
+    /usr/local/cuda/bin/../include/cuda_gl_interop.h \
     /Developer/GPU\ Computing/C/common/inc/cutil_math.h \
     /usr/include/_wctype.h \
     /usr/include/sys/appleapiopts.h \

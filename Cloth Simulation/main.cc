@@ -16,10 +16,11 @@
 static bool right_click = false;
 static bool left_click = false;
 
-static int x_camera = 0, y_camera = 0, z_camera = 10;
+static int x_camera = 0, y_camera = 0, z_camera = 50;
 static int lookAtX = 0, lookAtY = 0, lookAtZ = -1;
 
-int dsim;
+bool dsim = false;
+bool wind = false;
 
 /// The display callback.
 void display()
@@ -32,8 +33,6 @@ void display()
 			  0,1,0); // the direction of Up (default is y-axis)
 	
 	step_func();
-	
-//	calculate_normals();
 		
 	draw_forces();
 	draw_particles();
@@ -56,12 +55,13 @@ void keyboard(
 {
 	switch (key)
 	{
-		case 'c':	
-		case 'C':
-			clear_data ();
-			break;
 		case ' ':
 			dsim = !dsim;
+			break;
+		
+		case 'w':
+		case 'W':
+			wind = !wind;
 			break;
 		
 		case 'q':

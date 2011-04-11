@@ -9,7 +9,6 @@
 #pragma once
 
 #include "open_gl.hh"
-#include "cuda_err.hh"
 #include "cuda_helpers.hh"
 
 #define DAMPING 0.01 // how much to damp the cloth simulation each frame
@@ -48,7 +47,7 @@ __device__ __host__
 // = Add a force to the particle =
 // ===============================
 
-__device__ __host__	
+__device__ __host__ 
 	void addForce(float3 force){
 
 		m_forces += force/m_mass;	
@@ -67,7 +66,7 @@ __device__ __host__
 		m_normal += normal;
 	}
 
-__device__ __host__	
+__device__ 	
 	void step(float time){
 		
 		if(m_movable)

@@ -6,11 +6,11 @@ CC_OBJECTS = $(CC_SOURCES:.cc=.o)
 OBJECTS = $(CU_OBJECTS) $(CC_OBJECTS)
 
 OSNAME := $(shell uname -s)
-MACHNAME := $(shell uname -n | sed -r 's/.*[0-9]+\.//')
+MACHNAME := $(shell uname -n | sed 's/[0-9].*//')
 ifeq ($(OSNAME),Darwin)
 	include makefile.osx
 else
-ifeq ($(MACHNAME),ghc.andrew.cmu.edu)
+ifeq ($(MACHNAME),ghc)
 	include makefile.ghc
 else
 	include makefile.nix
@@ -29,7 +29,7 @@ main: $(OBJECTS) makefile
 	echo objects $(OBJECTS)
 	echo cu_objects $(CU_OBJECTS)
 	echo cc_objects $(CC_OBJECTS)
-	nvcc $(NVCC_CFLAGS) $(NVCC_LFLAGS) -o main $(OBJECTS)
+	nvcc $(NVCC_CFLAGS) $(NVCC_LFLAGS) -o main -g $(OBJECTS)
 
 $(CU_OBJECTS):
 	touch $@

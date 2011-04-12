@@ -16,7 +16,7 @@
 static bool right_click = false;
 static bool left_click = false;
 
-static int x_camera = 0, y_camera = 0, z_camera = 50;
+static int x_camera = 0, y_camera = 0, z_camera = 100;
 static int lookAtX = 0, lookAtY = 0, lookAtZ = -1;
 
 bool dsim = false;

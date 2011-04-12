@@ -49,6 +49,8 @@ GLuint flagTexId;
 
 int size = row * column;
 
+float2 offset;
+
 extern void verlet_simulation_step(struct Particle* pVector, float4 *data_pointer, GLuint vbo, bool wind, int row, int column);
 void deleteVBO(GLuint *vbo);
 extern bool dsim;
@@ -72,7 +74,7 @@ void free_data ( void )
 					Make Particles
 --------------------------------------------------------------------*/
 __global__
-void make_particles(struct Particle *pVector, float4 *data_pointer, int row, int column, int width, int height)
+void make_particles(struct Particle *pVector, float4 *data_pointer, int row, int column, int width, int height, float2 offset)
 {
 	// //calculate the unique thread index
 	int index = blockIdx.x * blockDim.x + threadIdx.x;
@@ -80,7 +82,7 @@ void make_particles(struct Particle *pVector, float4 *data_pointer, int row, int
 	int i = index%row;
 	int j = index/column;
 	
-	float3 pos = make_float3(width * (i/(float)row), -height * (j/(float)column), 0);
+	float3 pos = make_float3(offset.x + (width * (i/(float)row) ), offset.y + (-height * (j/(float)column) ), 0);
 	
 	if((j == 0 && i == 0) || (i == 0 && j == column-1))
 		pVector[getParticleInd(i,j,row)] = Particle(pos, 1, data_pointer, getParticleInd(i,j, row), false);
@@ -155,7 +157,6 @@ void make_flag_mesh( void )
     }
 }
 
-
 /*--------------------------------------------------------------------
 					Initialize System
 --------------------------------------------------------------------*/
@@ -178,7 +179,9 @@ void init_system(void)
 	int nBlocks = totalThreads/threadsPerBlock;
 	nBlocks += ((totalThreads % threadsPerBlock) > 0) ? 1 : 0;
 	
-	make_particles<<<nBlocks, threadsPerBlock>>>(pVector, data_pointer, row, column, width, height); // create particles
+	offset = make_float2(-10.0, 10.0f);
+	
+	make_particles<<<nBlocks, threadsPerBlock>>>(pVector, data_pointer, row, column, width, height, offset); // create particles
 		
 	/* unmap vbo */
 	cudaGLUnmapBufferObject(vbo);

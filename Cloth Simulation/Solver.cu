@@ -27,7 +27,7 @@ extern void createVBO(GLuint *vbo);
 extern void deleteVBO(GLuint *vbo);
 
 const float3 gravity = make_float3(0.0f, -0.15f, 0.0f);
-static const int threadsPerBlock = 128;
+static const int threadsPerBlock = 64;
 
 __device__ __host__
 int getParticle(int x, int y, int row){ return y*row+x; }

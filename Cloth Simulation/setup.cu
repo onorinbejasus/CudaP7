@@ -133,7 +133,7 @@ void init_system(void)
 	
 	/* create and copy */
 	
-	const int threadsPerBlock = 512;
+	const int threadsPerBlock = 128;
 	int totalThreads = row * column;
 	int nBlocks = totalThreads/threadsPerBlock;
 	nBlocks += ((totalThreads % threadsPerBlock) > 0) ? 1 : 0;
@@ -214,7 +214,7 @@ void step_func ( )
 		/* map vbo in cuda */
 		cudaGLMapBufferObject((void**)&data_pointer, vbo);
 		
-		const int threadsPerBlock = 512;
+		const int threadsPerBlock = 128;
 		int totalThreads = row * column;
 		int nBlocks = totalThreads/threadsPerBlock;
 		nBlocks += ((totalThreads % threadsPerBlock) > 0) ? 1 : 0;

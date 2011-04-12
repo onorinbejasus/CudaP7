@@ -61,7 +61,6 @@ setup.o : setup.cu \
     /usr/include/c++/4.2.1/i686-apple-darwin10/bits/c++config.h \
     /usr/local/cuda/bin/../include/sm_13_double_functions.h \
     /usr/include/i386/setjmp.h \
-    /usr/local/include/zlib.h \
     /usr/include/c++/4.2.1/bits/cmath.tcc \
     /usr/include/i386/signal.h \
     /usr/local/cuda/bin/../include/host_config.h \
@@ -75,6 +74,7 @@ setup.o : setup.cu \
     /Developer/GPU\ Computing/C/common/inc/GL/glew.h \
     /usr/include/i386/limits.h \
     /usr/local/cuda/bin/../include/device_functions.h \
+    /usr/include/zconf.h \
     /usr/include/libkern/_OSByteOrder.h \
     /usr/local/cuda/bin/../include/channel_descriptor.h \
     /usr/include/architecture/i386/math.h \
@@ -85,6 +85,7 @@ setup.o : setup.cu \
     /usr/include/c++/4.2.1/cmath \
     /usr/include/time.h \
     /usr/include/alloca.h \
+    /usr/include/zlib.h \
     /usr/local/cuda/bin/../include/vector_functions.h \
     /usr/include/c++/4.2.1/cstddef \
     /usr/include/c++/4.2.1/cstdlib \
@@ -100,7 +101,6 @@ setup.o : setup.cu \
     /usr/local/cuda/bin/../include/surface_functions.h \
     /usr/local/cuda/bin/../include/device_types.h \
     /usr/include/c++/4.2.1/ext/type_traits.h \
-    /usr/local/include/zconf.h \
     /System/Library/Frameworks/OpenGL.framework/Headers/gl.h \
     /usr/include/c++/4.2.1/bits/stl_pair.h \
     /usr/include/sys/types.h

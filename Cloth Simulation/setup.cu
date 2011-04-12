@@ -3,6 +3,7 @@
 //  Cloth Simulation
 //  
 //  Created by Timothy Luciani on 2011-04-10.
+//  Modified by Mitch Luban on 2011-04-12
 //  Copyright 2011 __MyCompanyName__. All rights reserved.
 // 
 
@@ -34,7 +35,7 @@ int row	  = 40;
 int column = 40;
 
 int width = 8;
-int height = 8;
+int height = 4;
 
 struct Particle* pVector;
 

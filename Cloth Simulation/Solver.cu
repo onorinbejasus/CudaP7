@@ -70,7 +70,7 @@ void add_force(struct Particle *pVector, float3 gravity, bool wind, int row, int
 	pVector[index].addForce(gravity * TIME_STEP);
 	
 	if(wind && y < column -1 && x < row-1){
-		float3 windDir = make_float3(0.5f, 0.0f, 0.2f);
+		float3 windDir = make_float3(0.3f, 0.3f, 0.2f);
 	
 		/* wind */
 		pVector[index].addForce( windForce(pVector, windDir, x, y, row) * 10 ) ;

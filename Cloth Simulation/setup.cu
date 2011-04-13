@@ -263,21 +263,27 @@ void init_system(void)
 
 void draw_particles ( void )
 {
+    glEnable(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_2D, flagTexId);
+
     glPushMatrix();
 	    glColor3f(1.0, 1.0, 1.0);
 
         glVertexPointer(4, GL_FLOAT, 0, 0);
+        glTexCoordPointer(2, GL_FLOAT, 0, 0);
         glBindBuffer(GL_ARRAY_BUFFER, vbo);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexVbo);
         glEnableClientState(GL_VERTEX_ARRAY);
+        glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 
         // Render flag mesh
-        glDrawElements(GL_TRIANGLES, numTriangles * 3, GL_UNSIGNED_INT, (GLvoid*)((char*)NULL));
+        glDrawElements(GL_TRIANGLES, numTriangles * 3, GL_UNSIGNED_INT, 0);
 
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
         glDisableClientState(GL_VERTEX_ARRAY); 
+        glDisableClientState(GL_TEXTURE_COORD_ARRAY);
     glPopMatrix(); 
 
     glDisable(GL_TEXTURE_2D);

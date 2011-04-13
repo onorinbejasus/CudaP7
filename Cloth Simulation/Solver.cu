@@ -20,11 +20,11 @@
 #include <cstdlib>
 #include <cstdio>
 
-#define TIME_STEP 0.25*0.25 // how large time step each particle takes each frame
+#define TIME_STEP 0.5*0.5 // how large time step each particle takes each frame
 #define CONSTRAINT_ITERATIONS 25 // how many iterations of constraint satisfaction each frame (more is rigid, less is soft)
 
-extern void createVBO(GLuint *vbo);
-extern void deleteVBO(GLuint *vbo);
+extern void createVBO();
+extern void deleteVBO();
 
 const float3 gravity = make_float3(0.0f, -0.15f, 0.0f);
 static const int threadsPerBlock = 64;
@@ -73,7 +73,7 @@ void add_force(struct Particle *pVector, float3 gravity, bool wind, int row, int
 		float3 windDir = make_float3(0.5f, 0.0f, 0.2f);
 	
 		/* wind */
-		pVector[index].addForce( windForce(pVector, windDir, x, y, row) * 0.05 ) ;
+		pVector[index].addForce( windForce(pVector, windDir, x, y, row) * 10 ) ;
 	
 	}
 	
@@ -362,11 +362,11 @@ void verlet_simulation_step(struct Particle* pVector, float4 *data_pointer, GLui
 	cudaThreadSynchronize();
 	
 	// remove old 
-	deleteVBO(&vbo);
+	deleteVBO();
 	data_pointer = 0;
 	
 	/* initialize VBO */
-	createVBO(&vbo);
+	createVBO();
 	
 	/* map vbo in cuda */
 	cudaGLMapBufferObject((void**)&data_pointer, vbo);

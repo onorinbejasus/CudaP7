@@ -71,7 +71,8 @@ void free_data ( void )
 	deleteVBO();
 	data_pointer = 0;
 
-    glDeleteBuffers(2, &indexVbo);
+    glDeleteBuffers(1, &indexVbo);
+    glDeleteBuffers(1, &texVbo);
 
     free(flagIndexArray);
     free(flagTexArray);
@@ -189,7 +190,9 @@ void make_flag_mesh( void )
 
     for(unsigned int ii = 0; ii < size; ii++)
     {
-        flagTexArray[ii] = make_float2((float)(ii%column)/colFloat, (float)(ii%row)/rowFloat);
+        int currX = column - ii%column;
+        int currY = (ii/column)%row;
+        flagTexArray[ii] = make_float2((float)currX/colFloat, (float)(currY)/rowFloat);
         printf("texCoord = (%f, %f)\n", flagTexArray[ii].x, flagTexArray[ii].y);
     }
 
@@ -238,7 +241,11 @@ void init_system(void)
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexVbo);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * numTriangles * 3, flagIndexArray, GL_STATIC_DRAW);
 
-    const char *flagTextureFilename = "Textures/american_flag2.png";
+    glGenBuffers(1, &texVbo);
+    glBindBuffer(GL_ARRAY_BUFFER, texVbo);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 2 * size, flagTexArray, GL_STATIC_DRAW);
+
+    const char *flagTextureFilename = "Textures/american_flag.png";
     int w, h;
     unsigned char *data = loadImageRGBA(flagTextureFilename, &w, &h);
 
@@ -246,8 +253,8 @@ void init_system(void)
     glActiveTexture(GL_TEXTURE0_ARB);
     glBindTexture(GL_TEXTURE_2D, flagTexId);
 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
@@ -269,9 +276,10 @@ void draw_particles ( void )
     glPushMatrix();
 	    glColor3f(1.0, 1.0, 1.0);
 
-        glVertexPointer(4, GL_FLOAT, 0, 0);
-        glTexCoordPointer(2, GL_FLOAT, 0, 0);
         glBindBuffer(GL_ARRAY_BUFFER, vbo);
+        glVertexPointer(4, GL_FLOAT, 0, 0);
+        glBindBuffer(GL_ARRAY_BUFFER, texVbo);
+        glTexCoordPointer(2, GL_FLOAT, 0, 0);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexVbo);
         glEnableClientState(GL_VERTEX_ARRAY);
         glEnableClientState(GL_TEXTURE_COORD_ARRAY);

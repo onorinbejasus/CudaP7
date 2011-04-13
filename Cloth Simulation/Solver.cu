@@ -20,7 +20,7 @@
 #include <cstdlib>
 #include <cstdio>
 
-#define TIME_STEP 0.5*0.5 // how large time step each particle takes each frame
+#define TIME_STEP 0.25*0.25 // how large time step each particle takes each frame
 #define CONSTRAINT_ITERATIONS 25 // how many iterations of constraint satisfaction each frame (more is rigid, less is soft)
 
 extern void createVBO(GLuint *vbo);
@@ -73,7 +73,7 @@ void add_force(struct Particle *pVector, float3 gravity, bool wind, int row, int
 		float3 windDir = make_float3(0.5f, 0.0f, 0.2f);
 	
 		/* wind */
-		pVector[index].addForce( windForce(pVector, windDir, x, y, row) * 10 ) ;
+		pVector[index].addForce( windForce(pVector, windDir, x, y, row) * 0.05 ) ;
 	
 	}
 	

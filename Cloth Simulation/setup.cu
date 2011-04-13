@@ -31,8 +31,8 @@
 
 #define MAXSAMPLES 100
 
-int row	  = 40;
-int column = 40;
+int row	  = 8;
+int column = 8;
 unsigned int numTriangles = (row-1)*(column-1)*2;
 
 int width = 8;
@@ -137,7 +137,7 @@ void make_flag_mesh( void )
     float colFloat = (float)column;
     float rowFloat = (float)row;
 
-    for(unsigned int ii = 0; ii < (size - column); ii++)
+    /*for(unsigned int ii = 0; ii < (size - column); ii++)
     {
         if( (ii+1) % column == 0 )
             continue;
@@ -155,7 +155,7 @@ void make_flag_mesh( void )
 
         currIndex += 3;
         currIndex_tex += 6;
-    }
+    }*/
 
     for(unsigned int ii = row; ii < size; ii++)
     {

@@ -59,7 +59,7 @@ void display()
 	step_func();
 		
     glPushMatrix();
-    glTranslatef(0.0f, 4.0f, 0.0f);
+    glTranslatef(-2.0f, 3.0f, -13.0f);
 	draw_particles();
     glPopMatrix();
 
@@ -185,7 +185,7 @@ void motion(
 int main(int argc, char **argv) {
 
     // Init camera variables
-    posX = 2.0; posY = 1.0; posZ = 13.0;
+    posX = 0.0; posY = 0.0; posZ = 0.0;
     cameraViewAngle = -1.5;
     cameraSight = 0.0;
     cameraSensitivity = 40.0;

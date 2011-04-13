@@ -13,11 +13,16 @@
 #include <iostream>
 #include <cmath>
 
+#define PI 3.14159265
+#define movingSpeed 10.0
+
 static bool right_click = false;
 static bool left_click = false;
 
-static int x_camera = 0, y_camera = 0, z_camera = 100;
-static int lookAtX = 0, lookAtY = 0, lookAtZ = -1;
+// Camera variables
+GLfloat posX, posY, posZ;
+GLfloat cameraViewAngle, cameraSight;
+GLfloat cameraSensitivity;
 
 bool dsim = false;
 bool wind = false;
@@ -25,17 +30,38 @@ bool wind = false;
 /// The display callback.
 void display()
 {
-	glClear(GL_COLOR_BUFFER_BIT |GL_DEPTH_BUFFER_BIT );
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity() ;
-	gluLookAt(x_camera, y_camera, z_camera,  // x,y,z coord of the camera 
-			  lookAtX, lookAtY, lookAtZ,
-			  0,1,0); // the direction of Up (default is y-axis)
+    // Set the projection matrix
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    gluPerspective(45.0, 1.0, 0.1, 100.0);
+
+    // Set the modelview matrix
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+
+    // Clear frame
+    glClearColor(0.0f, 0.0f, 0.5f, 0.0);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glLoadIdentity();
+
+    // Set the camera
+    gluLookAt(posX,
+              posY,
+              posZ,
+              posX + cos(cameraViewAngle) * cos(cameraSight),
+              posY + sin(cameraSight),
+              posZ + sin(cameraViewAngle) * cos(cameraSight),
+              cos(cameraViewAngle) * (-sin(cameraSight)),
+              cos(cameraSight),
+              sin(cameraViewAngle) * (-sin(cameraSight)));
 	
+
 	step_func();
 		
-	draw_forces();
+    glPushMatrix();
+    glTranslatef(0.0f, 4.0f, 0.0f);
 	draw_particles();
+    glPopMatrix();
 
 	glutSwapBuffers ();
 	
@@ -44,6 +70,15 @@ void display()
 
 void reshape(int width, int height) {
 	glViewport(0, 0, width, height);
+
+    // set the view matrix
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    gluPerspective(45.0, 1.0, 0.1, 100.0);
+
 	glutPostRedisplay();
 }
 
@@ -55,19 +90,63 @@ void keyboard(
 {
 	switch (key)
 	{
+        case 'j':
+        case 'J':
+            cameraViewAngle -= PI/cameraSensitivity;
+            break;
+        case 'l':
+        case 'L':
+            cameraViewAngle += PI/cameraSensitivity;
+            break;
+        case 'i':
+        case 'I':
+            cameraSight += 0.05;
+            break;
+        case 'k':
+        case 'K':
+            cameraSight -= 0.05;
+            break;
+        case 'a':
+        case 'A':
+            posX += movingSpeed/cameraSensitivity*sin(cameraViewAngle);
+            posZ -= movingSpeed/cameraSensitivity*cos(cameraViewAngle);
+            break;
+        case 'd':
+        case 'D':
+            posX -= movingSpeed/cameraSensitivity*sin(cameraViewAngle);
+            posZ += movingSpeed/cameraSensitivity*cos(cameraViewAngle);
+            break;
+        case 'w':
+        case 'W':
+            posX += movingSpeed/cameraSensitivity*cos(cameraViewAngle);
+            posZ += movingSpeed/cameraSensitivity*sin(cameraViewAngle);
+            break;
+        case 's':
+        case 'S':
+            posX -= movingSpeed/cameraSensitivity*cos(cameraViewAngle);
+            posZ -= movingSpeed/cameraSensitivity*sin(cameraViewAngle);
+            break;
 		case ' ':
 			dsim = !dsim;
 			break;
-		
-		case 'w':
-		case 'W':
+		case 'z':
+		case 'Z':
 			wind = !wind;
 			break;
-		
+        case 'p':
+        case 'P':
+            printf("Camera: (%f, %f, %f,) at (%f, %f)\n", posX, posY, posZ, cameraViewAngle, cameraSight);
+            break;
+        case 'e':
+        case 'E':
+            posY -= 4.0/cameraSensitivity;
+            break;
 		case 'q':
 		case 'Q':
+            posY += 4.0/cameraSensitivity;
+            break;
 		case 27:
-			free_data ();
+			free_data();
 			cudaThreadExit();
 			exit(0);
 			break;
@@ -104,6 +183,13 @@ void motion(
 }
 
 int main(int argc, char **argv) {
+
+    // Init camera variables
+    posX = 2.0; posY = 1.0; posZ = 13.0;
+    cameraViewAngle = -1.5;
+    cameraSight = 0.0;
+    cameraSensitivity = 40.0;
+
 	createWindow(argc, argv);
 	startApplication(argc, argv);
 	return 0;

@@ -23,8 +23,8 @@
 #define TIME_STEP 0.5*0.5 // how large time step each particle takes each frame
 #define CONSTRAINT_ITERATIONS 25 // how many iterations of constraint satisfaction each frame (more is rigid, less is soft)
 
-extern void createVBO();
-extern void deleteVBO();
+extern void createVBO(int numCloth);
+extern void deleteVBO(int numCloth);
 
 const float3 gravity = make_float3(0.0f, -0.15f, 0.0f);
 static const int threadsPerBlock = 64;
@@ -349,7 +349,7 @@ void satisfy(struct Particle *pVector, float4 *data_pointer, int row, int column
 	}
 }
 
-void verlet_simulation_step(struct Particle* pVector, float4 *data_pointer, GLuint vbo, bool wind, int row, int column){
+void verlet_simulation_step(struct Particle* pVector, float4 *data_pointer, GLuint vbo, bool wind, int row, int column, int numCloth){
 				
 	/* set up number of threads to run */	
 	int totalThreads = row * column;
@@ -362,11 +362,11 @@ void verlet_simulation_step(struct Particle* pVector, float4 *data_pointer, GLui
 	cudaThreadSynchronize();
 	
 	// remove old 
-	deleteVBO();
+	deleteVBO(numCloth);
 	data_pointer = 0;
 	
 	/* initialize VBO */
-	createVBO();
+	createVBO(numCloth);
 	
 	/* map vbo in cuda */
 	cudaGLMapBufferObject((void**)&data_pointer, vbo);

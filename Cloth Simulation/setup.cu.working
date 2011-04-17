@@ -31,8 +31,11 @@
 
 #define MAXSAMPLES 100
 
+extern int numCloths;
+
 int row	  = 40;
 int column = 40;
+unsigned int numTriangles = (row-1)*(column-1)*2;
 
 int width = 8;
 int height = 4;
@@ -40,15 +43,20 @@ int height = 4;
 struct Particle* pVector;
 
 GLuint vbo;
+GLuint texVbo;
+GLuint indexVbo;
+unsigned int *flagIndexArray;
 float4 *data_pointer;
 
-float *flagTexArray;
+float2 *flagTexArray;
 GLuint flagTexId;
 
 int size = row * column;
 
 extern void verlet_simulation_step(struct Particle* pVector, float4 *data_pointer, GLuint vbo, bool wind, int row, int column);
-void deleteVBO(GLuint *vbo);
+void deleteVBO();
+void deleteTexVBO();
+void deleteIndexVBO();
 extern bool dsim;
 extern bool wind;
 extern GLuint shader;
@@ -62,8 +70,14 @@ free/clear/allocate simulation data
 void free_data ( void )
 {
 	cudaFree(pVector);
-	deleteVBO(&vbo);
+	deleteVBO();
 	data_pointer = 0;
+
+    glDeleteBuffers(1, &indexVbo);
+    glDeleteBuffers(1, &texVbo);
+
+    free(flagIndexArray);
+    free(flagTexArray);
 }
 
 /*--------------------------------------------------------------------
@@ -91,34 +105,76 @@ void make_particles(struct Particle *pVector, float4 *data_pointer, int row, int
 					Create VBO
 ----------------------------------------------------------*/
 
-void createVBO(GLuint* vbo)
+void createVBO()
 {
     // create buffer object
-    glGenBuffers( 1, vbo);
-    glBindBuffer( GL_ARRAY_BUFFER, *vbo);
+    glGenBuffers( 1, &vbo);
+    glBindBuffer( GL_ARRAY_BUFFER, vbo);
 
     // initialize buffer object
-    unsigned int m_size = size * 4 * sizeof( float);
+    unsigned int m_size = size * 4 * sizeof(GLfloat);
     glBufferData( GL_ARRAY_BUFFER, m_size, 0, GL_DYNAMIC_DRAW);
 
-    glBindBuffer( GL_ARRAY_BUFFER, 0);
-
     // register buffer object with CUDA
-    cudaGLRegisterBufferObject(*vbo);
+    cudaGLRegisterBufferObject(vbo);
 }
 
 /*----------------------------------------------------------
 					Delete VBO
 ----------------------------------------------------------*/
-void deleteVBO( GLuint* vbo)
+void deleteVBO()
 {
-    glBindBuffer( 1, *vbo);
-    glDeleteBuffers( 1, vbo);
+    glBindBuffer( 1, vbo);
+    glDeleteBuffers( 1, &vbo);
 
-    cudaGLUnregisterBufferObject(*vbo);
-
-    *vbo = 0;
+    cudaGLUnregisterBufferObject(vbo);
 }
+
+/*--------------------------------------------------------------------
+					Make Flag Mesh out of particles
+--------------------------------------------------------------------*/
+
+void make_flag_mesh( void )
+{
+    unsigned int currIndex = 0;
+
+    float colFloat = (float)(column-1);
+    float rowFloat = (float)(row-1);
+
+    for(unsigned int ii = 0; ii < (size - column); ii++)
+    {
+        if( (ii+1) % column == 0 )
+            continue;
+
+        flagIndexArray[currIndex + 0] = ii + 0;
+        flagIndexArray[currIndex + 1] = ii + column;
+        flagIndexArray[currIndex + 2] = ii + 1;
+
+        currIndex += 3;
+    }
+
+    for(unsigned int ii = row; ii < size; ii++)
+    {
+        if( (ii+1) % column == 0 )
+            continue;
+
+        flagIndexArray[currIndex + 0] = ii + 0;
+        flagIndexArray[currIndex + 1] = ii + 1;
+        flagIndexArray[currIndex + 2] = (ii + 1) - column;
+
+        currIndex += 3;
+    }
+
+    for(unsigned int ii = 0; ii < size; ii++)
+    {
+        int currX = column - ii%column;
+        int currY = (ii/column)%row;
+        flagTexArray[ii] = make_float2((float)currX/colFloat, (float)(currY)/rowFloat);
+        printf("texCoord = (%f, %f)\n", flagTexArray[ii].x, flagTexArray[ii].y);
+    }
+
+}
+
 
 /*--------------------------------------------------------------------
 					Initialize System
@@ -130,13 +186,15 @@ void init_system(void)
 	cudaMalloc( (void**)&pVector, size * sizeof(struct Particle) );
 		
 	/* initialize VBO */
-	createVBO(&vbo);
+    glGenBuffers(1, &vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 4 * size, 0, GL_DYNAMIC_DRAW);
+    cudaGLRegisterBufferObject(vbo);
 	
 	/* map vbo in cuda */
 	cudaGLMapBufferObject((void**)&data_pointer, vbo);
 	
 	/* create and copy */
-	
 	const int threadsPerBlock = 64;
 	int totalThreads = row * column;
 	int nBlocks = totalThreads/threadsPerBlock;
@@ -147,20 +205,35 @@ void init_system(void)
 	/* unmap vbo */
 	cudaGLUnmapBufferObject(vbo);
 
-    /**********************
-     * Flag texturing
-     * *******************/
+    /******************************
+     * Flag texturing and meshing
+     * ***************************/
+
+    flagIndexArray = (unsigned int*)malloc(sizeof(unsigned int) * numTriangles * 3);
+    flagTexArray = (float2*)malloc(sizeof(float2) * size);
+    // flagTexArray = (float*)malloc(sizeof(float) * numTriangles * 3 * 2);
+    make_flag_mesh();
+
+    glGenBuffers(1, &indexVbo);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexVbo);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * numTriangles * 3, flagIndexArray, GL_STATIC_DRAW);
+
+    glGenBuffers(1, &texVbo);
+    glBindBuffer(GL_ARRAY_BUFFER, texVbo);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 2 * size, flagTexArray, GL_STATIC_DRAW);
 
     const char *flagTextureFilename = "Textures/american_flag.png";
     int w, h;
     unsigned char *data = loadImageRGBA(flagTextureFilename, &w, &h);
 
     glGenTextures(1, &flagTexId);
+    glActiveTexture(GL_TEXTURE0_ARB);
     glBindTexture(GL_TEXTURE_2D, flagTexId);
 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
 
@@ -169,42 +242,36 @@ void init_system(void)
 
 
 /*--------------------------------------------------------------------
-					Make Flag Mesh out of particles
---------------------------------------------------------------------*/
-
-void make_flag_mesh( void )
-{
-}
-
-/*--------------------------------------------------------------------
 					Draw Particles
 --------------------------------------------------------------------*/
 
 void draw_particles ( void )
 {
-    make_flag_mesh();
+    glEnable(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_2D, flagTexId);
 
     glPushMatrix();
-	    glColor3f(0, 1, 0);
+	    glColor3f(1.0, 1.0, 1.0);
 
+        glBindBuffer(GL_ARRAY_BUFFER, vbo);
+        glVertexPointer(4, GL_FLOAT, 0, 0);
+        glBindBuffer(GL_ARRAY_BUFFER, texVbo);
+        glTexCoordPointer(2, GL_FLOAT, 0, 0);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexVbo);
         glEnableClientState(GL_VERTEX_ARRAY);
         glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 
-        // Set up vertices
-        // glBindBufferARB(GL_ARRAY_BUFFER_ARB, vbo);
-        glVertexPointer(4, GL_FLOAT, 0, flagVertexArray);
+        // Render flag mesh
+        glDrawElements(GL_TRIANGLES, numTriangles * 3, GL_UNSIGNED_INT, 0);
 
-        // Set up textures
-        glTexCoordPointer(2, GL_FLOAT, 0, flagTexArray);
-
-	    // glDrawArrays(GL_POINTS, 0, size);
-        glDrawElements(GL_POINTS, size, GL_UNSIGNED_INT, flagIndices);
-
-        // glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
         glDisableClientState(GL_VERTEX_ARRAY); 
         glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-    glPopMatrix();
+    glPopMatrix(); 
+
+    glDisable(GL_TEXTURE_2D);
 }
 
 /*--------------------------------------------------------------------
@@ -234,11 +301,11 @@ void step_func ( )
 	else { // remap
 		
 	// remove old 
-		deleteVBO(&vbo);
+		deleteVBO();
 		data_pointer = 0;
 
 		/* initialize VBO */
-		createVBO(&vbo);
+		createVBO();
 
 		/* map vbo in cuda */
 		cudaGLMapBufferObject((void**)&data_pointer, vbo);

@@ -16,6 +16,8 @@
 #define PI 3.14159265
 #define movingSpeed 10.0
 
+int numCloths;
+
 static bool right_click = false;
 static bool left_click = false;
 
@@ -189,6 +191,20 @@ int main(int argc, char **argv) {
     cameraViewAngle = -1.5;
     cameraSight = 0.0;
     cameraSensitivity = 40.0;
+
+    if(argc <= 1)
+    {
+        numCloths = 1;
+    }
+    else if(argc == 2)
+    {
+        numCloths = (int)atoi(argv[1]);
+    }
+    else
+    {
+        printf("Usage: ./main [numCloths]\n");
+        return false;
+    }
 
 	createWindow(argc, argv);
 	startApplication(argc, argv);

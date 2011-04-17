@@ -31,6 +31,8 @@
 
 #define MAXSAMPLES 100
 
+extern int numCloths;
+
 int row	  = 40;
 int column = 40;
 unsigned int numTriangles = (row-1)*(column-1)*2;
@@ -38,21 +40,21 @@ unsigned int numTriangles = (row-1)*(column-1)*2;
 int width = 8;
 int height = 4;
 
-struct Particle* pVector;
+struct Particle** pVector;
 
-GLuint vbo;
+GLuint *vbo;
 GLuint texVbo;
 GLuint indexVbo;
 unsigned int *flagIndexArray;
-float4 *data_pointer;
+float4 **data_pointer;
 
 float2 *flagTexArray;
 GLuint flagTexId;
 
 int size = row * column;
 
-extern void verlet_simulation_step(struct Particle* pVector, float4 *data_pointer, GLuint vbo, bool wind, int row, int column);
-void deleteVBO();
+extern void verlet_simulation_step(struct Particle* pVector, float4 *data_pointer, GLuint vbo, bool wind, int row, int column, int numCloth);
+void deleteVBO(int numCloth);
 void deleteTexVBO();
 void deleteIndexVBO();
 extern bool dsim;
@@ -67,9 +69,13 @@ free/clear/allocate simulation data
 ----------------------------------------------------------------------*/
 void free_data ( void )
 {
-	cudaFree(pVector);
-	deleteVBO();
-	data_pointer = 0;
+    for(int ii = 0; ii < numCloths; ii++)
+    {
+	    cudaFree(pVector[ii]);
+	    deleteVBO(ii);
+	    data_pointer[ii] = 0;
+    }
+    data_pointer = 0;
 
     glDeleteBuffers(1, &indexVbo);
     glDeleteBuffers(1, &texVbo);
@@ -103,29 +109,29 @@ void make_particles(struct Particle *pVector, float4 *data_pointer, int row, int
 					Create VBO
 ----------------------------------------------------------*/
 
-void createVBO()
+void createVBO(int clothNum)
 {
     // create buffer object
-    glGenBuffers( 1, &vbo);
-    glBindBuffer( GL_ARRAY_BUFFER, vbo);
+    glGenBuffers( 1, &(vbo[clothNum]));
+    glBindBuffer( GL_ARRAY_BUFFER, vbo[clothNum]);
 
     // initialize buffer object
-    unsigned int m_size = size * 4 * sizeof(GLfloat);
+    unsigned int m_size = size * 4 * sizeof(float);
     glBufferData( GL_ARRAY_BUFFER, m_size, 0, GL_DYNAMIC_DRAW);
 
     // register buffer object with CUDA
-    cudaGLRegisterBufferObject(vbo);
+    cudaGLRegisterBufferObject(vbo[clothNum]);
 }
 
 /*----------------------------------------------------------
 					Delete VBO
 ----------------------------------------------------------*/
-void deleteVBO()
+void deleteVBO(int clothNum)
 {
-    glBindBuffer( 1, vbo);
-    glDeleteBuffers( 1, &vbo);
+    glBindBuffer( 1, vbo[clothNum]);
+    glDeleteBuffers( 1, &(vbo[clothNum]));
 
-    cudaGLUnregisterBufferObject(vbo);
+    cudaGLUnregisterBufferObject(vbo[clothNum]);
 }
 
 /*--------------------------------------------------------------------
@@ -135,7 +141,6 @@ void deleteVBO()
 void make_flag_mesh( void )
 {
     unsigned int currIndex = 0;
-    // unsigned int currIndex_tex = 0;
 
     float colFloat = (float)(column-1);
     float rowFloat = (float)(row-1);
@@ -149,15 +154,7 @@ void make_flag_mesh( void )
         flagIndexArray[currIndex + 1] = ii + column;
         flagIndexArray[currIndex + 2] = ii + 1;
 
-        /*flagTexArray[currIndex_tex + 0] = (float)((ii+0)%column)/colFloat;
-        flagTexArray[currIndex_tex + 1] = (float)((ii+0)%row)/rowFloat;
-        flagTexArray[currIndex_tex + 2] = (float)((ii+column)%column)/colFloat;
-        flagTexArray[currIndex_tex + 3] = (float)((ii+column)%row)/rowFloat;
-        flagTexArray[currIndex_tex + 4] = (float)((ii+1)%column)/colFloat;
-        flagTexArray[currIndex_tex + 5] = (float)((ii+1)%row)/rowFloat;*/
-
         currIndex += 3;
-        // currIndex_tex += 6;
     }
 
     for(unsigned int ii = row; ii < size; ii++)
@@ -169,24 +166,8 @@ void make_flag_mesh( void )
         flagIndexArray[currIndex + 1] = ii + 1;
         flagIndexArray[currIndex + 2] = (ii + 1) - column;
 
-        /* flagTexArray[currIndex_tex + 0] = (float)((ii+0)%column)/colFloat;
-        flagTexArray[currIndex_tex + 1] = (float)((ii+0)%row)/rowFloat;
-        flagTexArray[currIndex_tex + 2] = (float)((ii+1)%column)/colFloat;
-        flagTexArray[currIndex_tex + 3] = (float)((ii+1)%row)/rowFloat;
-        flagTexArray[currIndex_tex + 4] = (float)((ii+1-column)%column)/colFloat;
-        flagTexArray[currIndex_tex + 5] = (float)((ii+1-column)%row)/rowFloat; */
-
         currIndex += 3;
-        // currIndex_tex += 6;
     }
-
-    /*for(unsigned int ii = 0; ii < size; ii++)
-    {
-        unsigned int ii_2 = ii*2;
-        flagTexArray[ii_2 + 0] = (float)(ii%column)/colFloat;
-        flagTexArray[ii_2 + 1] = (float)(ii%row)/rowFloat;
-        printf("texCoord = (%f, %f)\n", flagTexArray[ii_2], flagTexArray[ii_2 + 1]);
-    }*/
 
     for(unsigned int ii = 0; ii < size; ii++)
     {
@@ -196,6 +177,7 @@ void make_flag_mesh( void )
         printf("texCoord = (%f, %f)\n", flagTexArray[ii].x, flagTexArray[ii].y);
     }
 
+    printf("currIndex = %i\n", currIndex);
 }
 
 
@@ -205,28 +187,35 @@ void make_flag_mesh( void )
 
 void init_system(void)
 {		
+    vbo = (GLuint*)malloc(sizeof(GLuint) * numCloths);
+    pVector = (Particle**)malloc(sizeof(Particle*) * numCloths);
+    data_pointer = (float4**)malloc(sizeof(float4*) * numCloths);
+
 	/* malloc cuda memory*/
-	cudaMalloc( (void**)&pVector, size * sizeof(struct Particle) );
+    for(int ii = 0; ii < numCloths; ii++)
+    {
+	    cudaMalloc( (void**)&(pVector[ii]), size * sizeof(struct Particle) );
 		
-	/* initialize VBO */
-    glGenBuffers(1, &vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 4 * size, 0, GL_DYNAMIC_DRAW);
-    cudaGLRegisterBufferObject(vbo);
+	    /* initialize VBO */
+        glGenBuffers(1, &(vbo[ii]));
+        glBindBuffer(GL_ARRAY_BUFFER, vbo[ii]);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 4 * size, 0, GL_DYNAMIC_DRAW);
+        cudaGLRegisterBufferObject(vbo[ii]);
 	
-	/* map vbo in cuda */
-	cudaGLMapBufferObject((void**)&data_pointer, vbo);
+	    /* map vbo in cuda */
+	    cudaGLMapBufferObject((void**)&(data_pointer[ii]), vbo[ii]);
 	
-	/* create and copy */
-	const int threadsPerBlock = 64;
-	int totalThreads = row * column;
-	int nBlocks = totalThreads/threadsPerBlock;
-	nBlocks += ((totalThreads % threadsPerBlock) > 0) ? 1 : 0;
+	    /* create and copy */
+	    const int threadsPerBlock = 64;
+	    int totalThreads = row * column;
+	    int nBlocks = totalThreads/threadsPerBlock;
+	    nBlocks += ((totalThreads % threadsPerBlock) > 0) ? 1 : 0;
 	
-	make_particles<<<nBlocks, threadsPerBlock>>>(pVector, data_pointer, row, column, width, height); // create particles
+	    make_particles<<<nBlocks, threadsPerBlock>>>(pVector[ii], data_pointer[ii], row, column, width, height); // create particles
 		
-	/* unmap vbo */
-	cudaGLUnmapBufferObject(vbo);
+	    /* unmap vbo */
+	    cudaGLUnmapBufferObject(vbo[ii]);
+    }
 
     /******************************
      * Flag texturing and meshing
@@ -243,7 +232,7 @@ void init_system(void)
 
     glGenBuffers(1, &texVbo);
     glBindBuffer(GL_ARRAY_BUFFER, texVbo);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 2 * size, flagTexArray, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 2 * size, flagTexArray, GL_STATIC_DRAW);
 
     const char *flagTextureFilename = "Textures/american_flag.png";
     int w, h;
@@ -273,26 +262,30 @@ void draw_particles ( void )
     glEnable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, flagTexId);
 
-    glPushMatrix();
-	    glColor3f(1.0, 1.0, 1.0);
+    for(int ii = 0; ii < numCloths; ii++)
+    {
+        glPushMatrix();
+	        glColor3f(1.0, 1.0, 1.0);
+            glTranslatef(ii*10, 0.0, 0.0);
 
-        glBindBuffer(GL_ARRAY_BUFFER, vbo);
-        glVertexPointer(4, GL_FLOAT, 0, 0);
-        glBindBuffer(GL_ARRAY_BUFFER, texVbo);
-        glTexCoordPointer(2, GL_FLOAT, 0, 0);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexVbo);
-        glEnableClientState(GL_VERTEX_ARRAY);
-        glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+            glBindBuffer(GL_ARRAY_BUFFER, vbo[ii]);
+            glVertexPointer(4, GL_FLOAT, 0, 0);
+            glBindBuffer(GL_ARRAY_BUFFER, texVbo);
+            glTexCoordPointer(2, GL_FLOAT, 0, 0);
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexVbo);
+            glEnableClientState(GL_VERTEX_ARRAY);
+            glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 
-        // Render flag mesh
-        glDrawElements(GL_TRIANGLES, numTriangles * 3, GL_UNSIGNED_INT, 0);
+            // Render flag mesh
+            glDrawElements(GL_TRIANGLES, numTriangles * 3, GL_UNSIGNED_INT, 0);
 
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+            glBindBuffer(GL_ARRAY_BUFFER, 0);
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-        glDisableClientState(GL_VERTEX_ARRAY); 
-        glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-    glPopMatrix(); 
+            glDisableClientState(GL_VERTEX_ARRAY); 
+            glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+        glPopMatrix(); 
+    }
 
     glDisable(GL_TEXTURE_2D);
 }
@@ -318,30 +311,32 @@ void remap_GUI(struct Particle *pVector, float4 *data_pointer)
 
 void step_func ( )
 {
-	if ( dsim ){ // simulate
-		verlet_simulation_step(pVector, data_pointer, vbo, wind, row, column);
-	}
-	else { // remap
+    for(int ii = 0; ii < numCloths; ii++)
+    {
+	    if ( dsim ){ // simulate
+		    verlet_simulation_step(pVector[ii], data_pointer[ii], vbo[ii], wind, row, column, ii);
+	    }
+	    else { // remap
 		
-	// remove old 
-		deleteVBO();
-		data_pointer = 0;
+	        // remove old 
+		    deleteVBO(ii);
+		    data_pointer[ii] = 0;
 
-		/* initialize VBO */
-		createVBO();
+		    /* initialize VBO */
+		    createVBO(ii);
 
-		/* map vbo in cuda */
-		cudaGLMapBufferObject((void**)&data_pointer, vbo);
+		    /* map vbo in cuda */
+		    cudaGLMapBufferObject((void**)&(data_pointer[ii]), vbo[ii]);
 		
-		const int threadsPerBlock = 64;
-		int totalThreads = row * column;
-		int nBlocks = totalThreads/threadsPerBlock;
-		nBlocks += ((totalThreads % threadsPerBlock) > 0) ? 1 : 0;
+		    const int threadsPerBlock = 64;
+		    int totalThreads = row * column;
+		    int nBlocks = totalThreads/threadsPerBlock;
+		    nBlocks += ((totalThreads % threadsPerBlock) > 0) ? 1 : 0;
 		
-		remap_GUI<<<nBlocks, threadsPerBlock>>>(pVector, data_pointer);
+		    remap_GUI<<<nBlocks, threadsPerBlock>>>(pVector[ii], data_pointer[ii]);
 		
-		/* unmap vbo */
-		cudaGLUnmapBufferObject(vbo);
-		
-	}
+		    /* unmap vbo */
+		    cudaGLUnmapBufferObject(vbo[ii]);
+	    }
+    }
 }

@@ -259,6 +259,7 @@ void init_system(void)
 
 void draw_particles ( void )
 {
+    glEnable(GL_SCISSOR_TEST);
     glEnable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, flagTexId);
 

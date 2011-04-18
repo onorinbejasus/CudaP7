@@ -13,7 +13,3 @@ newmtl material_1
     Kd 0.364706 0.560784 0.207843
     Ks 0.028297 0.026913 0.027528
     Tf 1.000000 1.000000 1.000000
-    map_Ka "mountain_mtl1_ambicol"
-    map_Kd "mountain_mtl1_diffcol"
-    map_Ks "mountain_mtl1_speccol"
-    map_Bump "mountain_mtl1_bumpamt"

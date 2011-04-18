@@ -12,10 +12,6 @@ endif
 # this is what we're building
 all: main
 
-# dependency handling
-.DELETE_ON_ERROR:
--include $(OBJECTS:.o=.d)
-
 # the principal target
 main: $(OBJECTS) makefile
 	echo objects $(OBJECTS)
@@ -33,4 +29,4 @@ docs:
 
 # clean the installation
 clean:
-	rm -rfv main *.o *.d doc
+	rm -rfv main *.o doc

@@ -259,7 +259,6 @@ void init_system(void)
 
 void draw_particles ( void )
 {
-    glEnable(GL_SCISSOR_TEST);
     glEnable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, flagTexId);
 
@@ -316,6 +315,16 @@ void step_func ( )
     {
 	    if ( dsim ){ // simulate
 		    verlet_simulation_step(pVector[ii], data_pointer[ii], vbo[ii], wind, row, column, ii);
+            /* struct Particle *temp = (struct Particle*)malloc(sizeof(struct Particle) * size);
+            cudaMemcpy(temp, pVector[ii], size*sizeof(struct Particle), cudaMemcpyDeviceToHost);
+            for(int i = 0; i < size; i++)
+            {
+                printf("Location = (%f, %f, %f)\n", temp[i].m_Position.x, temp[i].m_Position.y, temp[i].m_Position.z);
+                int max = 9;
+                if(temp[i].m_Position.x > max || temp[i].m_Position.x < -max ||
+                   temp[i].m_Position.y > max || temp[i].m_Position.y < -max)
+                    exit(-1);
+            }*/
 	    }
 	    else { // remap
 		

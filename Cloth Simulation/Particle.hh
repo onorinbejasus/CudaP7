@@ -11,7 +11,7 @@
 #include "open_gl.hh"
 #include "cuda_helpers.hh"
 
-#define DAMPING 0.01 // how much to damp the cloth simulation each frame
+#define DAMPING 0.1 // how much to damp the cloth simulation each frame
 
 struct Particle
 {

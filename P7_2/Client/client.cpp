@@ -135,7 +135,7 @@ private:
 void my_display(void) {
   /* clear the buffer */
   /* NEW: now we have to clear depth as well */
-  glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT) ;
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   glMatrixMode(GL_MODELVIEW) ;
   glLoadIdentity();

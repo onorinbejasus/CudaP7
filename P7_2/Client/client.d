@@ -38,6 +38,7 @@ client.o : client.cpp \
     /Developer/boost_1_46_1/boost/preprocessor/logical/compl.hpp \
     /Developer/boost_1_46_1/boost/asio/ip/basic_endpoint.hpp \
     /Developer/boost_1_46_1/boost/mpl/protect.hpp \
+    /usr/local/cuda/bin/../include/driver_functions.h \
     /usr/include/c++/4.2.1/i686-apple-darwin10/x86_64/bits/c++config.h \
     /usr/include/c++/4.2.1/bits/stl_raw_storage_iter.h \
     /Developer/boost_1_46_1/boost/type_traits/add_reference.hpp \
@@ -91,6 +92,7 @@ client.o : client.cpp \
     /usr/include/c++/4.2.1/vector \
     /Developer/boost_1_46_1/boost/asio/ip/basic_resolver_query.hpp \
     /Developer/boost_1_46_1/boost/serialization/is_bitwise_serializable.hpp \
+    open_gl.hh \
     /Developer/boost_1_46_1/boost/system/config.hpp \
     /usr/include/c++/4.2.1/i686-apple-darwin10/x86_64/bits/ctype_base.h \
     /Developer/boost_1_46_1/boost/asio/detail/kqueue_reactor.hpp \
@@ -287,6 +289,7 @@ client.o : client.cpp \
     /Developer/boost_1_46_1/boost/bind/bind_mf2_cc.hpp \
     /Developer/boost_1_46_1/boost/mpl/apply.hpp \
     /Developer/boost_1_46_1/boost/mpl/aux_/preprocessed/gcc/template_arity.hpp \
+    /usr/local/cuda/bin/../include/cuda_runtime_api.h \
     /usr/include/c++/4.2.1/cassert \
     /Developer/boost_1_46_1/boost/preprocessor/comma_if.hpp \
     /Developer/boost_1_46_1/boost/type_traits/is_base_of.hpp \
@@ -466,6 +469,8 @@ client.o : client.cpp \
     /Developer/boost_1_46_1/boost/smart_ptr/detail/sp_has_sync.hpp \
     /Developer/boost_1_46_1/boost/asio/read.hpp \
     /Developer/boost_1_46_1/boost/mpl/aux_/has_apply.hpp \
+    /usr/local/cuda/bin/../include/cuda_runtime.h \
+    window.hh \
     /Developer/boost_1_46_1/boost/asio/detail/op_queue.hpp \
     /Developer/boost_1_46_1/boost/asio/posix/basic_stream_descriptor.hpp \
     /Developer/boost_1_46_1/boost/asio/windows/stream_handle_service.hpp \
@@ -520,6 +525,7 @@ client.o : client.cpp \
     /Developer/boost_1_46_1/boost/preprocessor/repetition/enum_params.hpp \
     /Developer/boost_1_46_1/boost/serialization/smart_cast.hpp \
     /Developer/boost_1_46_1/boost/mpl/less_equal.hpp \
+    /usr/local/cuda/bin/../include/host_config.h \
     /usr/include/c++/4.2.1/bits/codecvt.h \
     /Developer/boost_1_46_1/boost/serialization/level.hpp \
     /Developer/boost_1_46_1/boost/serialization/collections_save_imp.hpp \
@@ -540,7 +546,6 @@ client.o : client.cpp \
     /Developer/boost_1_46_1/boost/mpl/aux_/config/dtp.hpp \
     /Developer/boost_1_46_1/boost/asio/basic_socket_acceptor.hpp \
     /Developer/boost_1_46_1/boost/mpl/comparison.hpp \
-    /System/Library/Frameworks/OpenGL.framework/Headers/glext.h \
     /Developer/boost_1_46_1/boost/iterator.hpp \
     /Developer/boost_1_46_1/boost/asio/detail/impl/task_io_service.hpp \
     /Developer/boost_1_46_1/boost/asio/detail/posix_tss_ptr.hpp \
@@ -596,6 +601,7 @@ client.o : client.cpp \
     /Developer/boost_1_46_1/boost/smart_ptr/detail/spinlock_sync.hpp \
     /Developer/boost_1_46_1/boost/type_traits/is_polymorphic.hpp \
     /Developer/boost_1_46_1/boost/mpl/aux_/preprocessed/gcc/arg.hpp \
+    /Developer/GPU\ Computing/C/common/inc/GL/glew.h \
     /usr/include/i386/limits.h \
     /Developer/boost_1_46_1/boost/asio/detail/reactor_op.hpp \
     /Developer/boost_1_46_1/boost/asio/detail/pipe_select_interrupter.hpp \
@@ -652,6 +658,7 @@ client.o : client.cpp \
     /Developer/boost_1_46_1/boost/mpl/aux_/include_preprocessed.hpp \
     /Developer/boost_1_46_1/boost/serialization/split_member.hpp \
     /Developer/boost_1_46_1/boost/mpl/aux_/preprocessed/gcc/placeholders.hpp \
+    /usr/local/cuda/bin/../include/channel_descriptor.h \
     /Developer/boost_1_46_1/boost/cstdint.hpp \
     /Developer/boost_1_46_1/boost/operators.hpp \
     /Developer/boost_1_46_1/boost/exception/exception.hpp \
@@ -745,6 +752,7 @@ client.o : client.cpp \
     /usr/include/c++/4.2.1/bits/ios_base.h \
     /Developer/boost_1_46_1/boost/asio/ip/impl/basic_endpoint.hpp \
     /Developer/boost_1_46_1/boost/bind/mem_fn.hpp \
+    /usr/local/cuda/bin/../include/vector_functions.h \
     /usr/include/c++/4.2.1/cstddef \
     /usr/include/c++/4.2.1/cstdlib \
     /usr/include/c++/4.2.1/bits/stl_iterator.h \

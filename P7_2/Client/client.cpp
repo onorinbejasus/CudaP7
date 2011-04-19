@@ -14,14 +14,29 @@
 #include <vector>
 #include "../Shared/connection.hh" // Must come before boost/serialization headers.
 #include <boost/serialization/vector.hpp>
+
+#include <cuda_runtime.h>
+
 #include "../Shared/data.hh"
+#include "window.hh"
+#include "open_gl.hh"
 
 #include <GLUT/glut.h>
 
 #define min(a,b) ((a) < (b)? a:b)
+#define PI 3.14159265
+#define movingSpeed 10.0
 
 GLuint display_list;		
 
+// Camera variables
+GLfloat posX, posY, posZ;
+GLfloat cameraViewAngle, cameraSight;
+GLfloat cameraSensitivity;
+
+// Simulation variables
+bool dsim = true;
+bool wind = true;
 
 namespace s11n_example {
 
@@ -132,75 +147,160 @@ private:
 // = Display =
 // ===========
 
-void my_display(void) {
-  /* clear the buffer */
-  /* NEW: now we have to clear depth as well */
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+void display(void) {
+    // Set the projection matrix
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    gluPerspective(45.0, 1.0, 0.1, 100.0);
 
-  glMatrixMode(GL_MODELVIEW) ;
-  glLoadIdentity();
-  gluLookAt(0.0, 5.0, 25.0,  // x,y,z coord of the camera 
-	    0.0, 0.0, 0.0,  // x,y,z coord of the origin
-	    0.0, 1.0, 0.0); // the direction of up (default is y-axis)  
+    // Set the modelview matrix
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
 
-  glColor3f(1.0, 0.0, 0.0);
+    // Clear frame
+    glClearColor(0.0f, 0.0f, 0.5f, 0.0);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glLoadIdentity();
+
+    // Set the camera
+    gluLookAt(posX,
+              posY,
+              posZ,
+              posX + cos(cameraViewAngle) * cos(cameraSight),
+              posY + sin(cameraSight),
+              posZ + sin(cameraViewAngle) * cos(cameraSight),
+              cos(cameraViewAngle) * (-sin(cameraSight)),
+              cos(cameraSight),
+              sin(cameraViewAngle) * (-sin(cameraSight)));
+
+
+    glColor3f(1.0, 0.0, 0.0);
   
-  glCallList(display_list);
+    glCallList(display_list);
   
-  glPopMatrix();
-  /* buffer is ready */
-  glutSwapBuffers();
+    /* buffer is ready */
+    glutSwapBuffers();
 	
-  return ;
+    return;
 }
 
 // ===========
 // = Reshape =
 // ===========
-void my_reshape(int w, int h) {
 
-  /* define viewport -- x, y, (origin is at lower left corner) width, height */
-  glViewport (0, 0, min(w,h), min(w,h));
-  return;
+void reshape(int width, int height) {
+	glViewport(0, 0, width, height);
+	
+    // set the view matrix
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+	
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    gluPerspective(45.0, 1.0, 0.1, 100.0);
+	
+	glutPostRedisplay();
 }
 
 // ===================================
 // = GLUT and OpenGL setup functions =
 // ===================================
 
-void glut_setup(void) {
 
-  /* specify display mode -- here we ask for a double buffer and RGB coloring */
-  /* NEW: tell display we care about depth now */
-  glutInitDisplayMode (GLUT_DOUBLE |GLUT_RGB |GLUT_DEPTH);
 
-  /* make a 400x400 window with the title of "Stitcher" placed at the top left corner */
-  glutInitWindowSize(400,400);
-  glutInitWindowPosition(0,0);
-  glutCreateWindow("Mesh View 1.0");
-
-  /*initialize callback functions */
-  glutDisplayFunc( my_display );
-  glutReshapeFunc( my_reshape ); 
- 
-  return ;
+/// The keyboard callback
+void keyboard(
+			  unsigned char key,	///< the key being pressed
+			  int x,				///< x coordinate of the mouse
+			  int y)				///< y coordinate of the mouse
+{
+	switch (key)
+	{
+        case 'j':
+        case 'J':
+            cameraViewAngle -= PI/cameraSensitivity;
+            break;
+        case 'l':
+        case 'L':
+            cameraViewAngle += PI/cameraSensitivity;
+            break;
+        case 'i':
+        case 'I':
+            cameraSight += 0.05;
+            break;
+        case 'k':
+        case 'K':
+            cameraSight -= 0.05;
+            break;
+        case 'a':
+        case 'A':
+            posX += movingSpeed/cameraSensitivity*sin(cameraViewAngle);
+            posZ -= movingSpeed/cameraSensitivity*cos(cameraViewAngle);
+            break;
+        case 'd':
+        case 'D':
+            posX -= movingSpeed/cameraSensitivity*sin(cameraViewAngle);
+            posZ += movingSpeed/cameraSensitivity*cos(cameraViewAngle);
+            break;
+        case 'w':
+        case 'W':
+            posX += movingSpeed/cameraSensitivity*cos(cameraViewAngle);
+            posZ += movingSpeed/cameraSensitivity*sin(cameraViewAngle);
+            break;
+        case 's':
+        case 'S':
+            posX -= movingSpeed/cameraSensitivity*cos(cameraViewAngle);
+            posZ -= movingSpeed/cameraSensitivity*sin(cameraViewAngle);
+            break;
+        case 'p':
+        case 'P':
+            printf("Camera: (%f, %f, %f,) at (%f, %f)\n", posX, posY, posZ, cameraViewAngle, cameraSight);
+            break;
+        case 'e':
+        case 'E':
+            posY -= 4.0/cameraSensitivity;
+            break;
+		case 'q':
+		case 'Q':
+            posY += 4.0/cameraSensitivity;
+            break;
+		case 27:
+			// free_data();
+			cudaThreadExit();
+			exit(0);
+			break;
+			
+		default:
+			break;
+	}
+	
+	glutPostRedisplay();
+	
 }
 
-void gl_setup(void) {
-
-  /* specifies a background color: black in this case */
-  glClearColor(0,0,0,0) ;
-
-  /* NEW: now we have to enable depth handling (z-buffer) */
-  glEnable(GL_DEPTH_TEST);
-
-  /* NEW: setup for 3d projection */
-  glMatrixMode (GL_PROJECTION);
-  glLoadIdentity();
-  // perspective view
-  gluPerspective( 20.0, 1.0, 1.0, 100.0);
-  return;
+/// timer callback function
+void my_timer(int id){
+	
 }
+
+/// The mouse callback
+void mouse(
+		   int button, ///< which button was pressesd
+		   int state,	///< up or down
+		   int x,		///< x position
+		   int y)		///< y position
+{	
+	return;
+}
+
+/// Mouse motion callback
+void motion(
+			int x,		///< x coordinate of mouse
+			int y)		///< y coordinate of mouse
+{
+	return;
+}
+
 
 // ========
 // = Main =
@@ -208,32 +308,33 @@ void gl_setup(void) {
 
 int main(int argc, char* argv[])
 {
-  glutInit( &argc, argv ) ;
+	createWindow(argc, argv);
+	
+	try
+	{
+	  // Check command line arguments.
+	  if (argc != 3)
+		{
+		std::cerr << "Usage: client <host> <port>" << std::endl;
+		return 1;
+		}
 
-  /* we define these setup procedures */
-  glut_setup() ;  
-  gl_setup() ;
-	  
-  try
-  {
-    // Check command line arguments.
-    if (argc != 3)
-    {
-      std::cerr << "Usage: client <host> <port>" << std::endl;
-      return 1;
-    }
+	  boost::asio::io_service io_service;
+	  s11n_example::client client(io_service, argv[1], argv[2]);
+	  io_service.run();
+	}
+	catch (std::exception& e)
+	{
+	  std::cerr << e.what() << std::endl;
+	}
 
-    boost::asio::io_service io_service;
-    s11n_example::client client(io_service, argv[1], argv[2]);
-    io_service.run();
-  }
-  catch (std::exception& e)
-  {
-    std::cerr << e.what() << std::endl;
-  }
+	// Init the camera variables
+	posX = 0.0; posY = 0.0; posZ = 0.0;
+	cameraViewAngle = -1.5;
+	cameraSight = 0.0;
+	cameraSensitivity = 40;
 
-/* go into the main event loop */
-  glutMainLoop() ;
+	startApplication(argc, argv);
 
-  return 0;
+	return 0;
 }

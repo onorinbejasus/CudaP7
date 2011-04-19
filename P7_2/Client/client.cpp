@@ -48,7 +48,7 @@ public:
   client(boost::asio::io_service& io_service,
       const std::string& host, const std::string& service)
     : connection_(io_service)
-  {
+	{
     // Resolve the host name into an IP address.
     boost::asio::ip::tcp::resolver resolver(io_service);
     boost::asio::ip::tcp::resolver::query query(host, service);
@@ -98,6 +98,7 @@ public:
   {
     if (!e)
     {
+		
 	  // initialize display list 
 		
 		display_list = glGenLists(1);
@@ -137,7 +138,7 @@ private:
   std::vector<struct m_triangle> mesh_;
 };
 
-} // namespace s11n_example
+} // namespace s11n_example 
 
 // ============================
 // = GLUT / OpenGL Call Backs =
@@ -310,6 +311,12 @@ int main(int argc, char* argv[])
 {
 	createWindow(argc, argv);
 	
+	// boost::asio::io_service io_service;
+	// s11n_example::client(io_service, argv[1], argv[2]);
+	// io_service.run();
+	//io_service.run();
+	//io_service.run();
+	
 	try
 	{
 	  // Check command line arguments.
@@ -322,6 +329,7 @@ int main(int argc, char* argv[])
 	  boost::asio::io_service io_service;
 	  s11n_example::client client(io_service, argv[1], argv[2]);
 	  io_service.run();
+
 	}
 	catch (std::exception& e)
 	{

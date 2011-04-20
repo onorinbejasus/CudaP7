@@ -307,11 +307,17 @@ void satisfy(struct Particle *pVector, float4 *data_pointer, int row, int column
 
 			} // end if
 
-			if(!pVector[p1].m_movable)
+			if(!pVector[p1].m_movable){
+				
 				pVector[p1].m_Position = pVector[p1].m_ConstructPos;
-
-			if(!pVector[p2].m_movable)
+				data_pointer[p1] = make_float4(pVector[p1].m_ConstructPos, 1);
+			}
+			if(!pVector[p2].m_movable){
+				
 				pVector[p2].m_Position = pVector[p2].m_ConstructPos;
+				data_pointer[p2] = make_float4(pVector[p2].m_ConstructPos, 1);
+				
+			}		
 		}
 
 		if(ii < row-2 && jj < column -2){ // up right	

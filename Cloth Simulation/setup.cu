@@ -33,11 +33,8 @@
 
 extern int numCloths;
 
-<<<<<<< HEAD
 static const int threadsPerBlock = 256;
 
-=======
->>>>>>> 1bc3a3d4a5defbfedcb0649fb9a4a22ebb729ad9
 int row	  = 40;
 int column = 40;
 unsigned int numTriangles = (row-1)*(column-1)*2;
@@ -275,15 +272,15 @@ void draw_particles ( void )
             glTranslatef(ii*10, 0.0, 0.0);
 
             glBindBuffer(GL_ARRAY_BUFFER, vbo[ii]);
-            glVertexPointer(4, GL_FLOAT, 0, 0);
+            glVertexPointer(4, GL_FLOAT, 0, (GLvoid*)((char*)NULL));
             glBindBuffer(GL_ARRAY_BUFFER, texVbo);
-            glTexCoordPointer(2, GL_FLOAT, 0, 0);
+            glTexCoordPointer(2, GL_FLOAT, 0, (GLvoid*)((char*)NULL));
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexVbo);
             glEnableClientState(GL_VERTEX_ARRAY);
             glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 
             // Render flag mesh
-            glDrawElements(GL_TRIANGLES, numTriangles * 3, GL_UNSIGNED_INT, 0);
+            glDrawElements(GL_TRIANGLES, numTriangles * 3, GL_UNSIGNED_INT, (GLvoid*)((char*)NULL));
 
             glBindBuffer(GL_ARRAY_BUFFER, 0);
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);

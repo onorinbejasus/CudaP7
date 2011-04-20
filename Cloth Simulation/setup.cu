@@ -33,7 +33,7 @@
 
 extern int numCloths;
 
-static const int threadsPerBlock = 256;
+static const int threadsPerBlock = 128;
 
 int row	  = 40;
 int column = 40;

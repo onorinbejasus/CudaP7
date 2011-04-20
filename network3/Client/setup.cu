@@ -70,8 +70,8 @@ void init_system(void)
      * Flag texturing and meshing
      * ***************************/
 
-    flagIndexArray = (unsigned int*)malloc(sizeof(unsigned int) * numTriangles * 3);
-	readline(sock, (unsigned int*)flagIndexArray, sizeof(unsigned int) * numTriangles * 3);
+    flagIndexArray = (uint*)malloc(sizeof(uint) * numTriangles * 3);
+	readline(sock, (uint*)flagIndexArray, sizeof(uint) * numTriangles * 3);
 
     glGenBuffers(1, &indexVbo);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexVbo);
@@ -79,7 +79,7 @@ void init_system(void)
 	
 	for(int ii = 0; ii < numTriangles * 3; ii++)
 	{
-		printf("index: %i\n", flagIndexArray[ii]);
+		printf("index: %u\n", flagIndexArray[ii]);
 	}
 	
 	// data_pointer initialize
@@ -92,10 +92,10 @@ void init_system(void)
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * size * 3, data_pointer, GL_DYNAMIC_DRAW);
 	
-	for(int ii = 0; ii < size * 3; ii++)
-	{
-		printf("data: %f\n", data_pointer[ii]);
-	}
+	// for(int ii = 0; ii < size * 3; ii++)
+	// {
+	// 	printf("data: %f\n", data_pointer[ii]);
+	// }
 }
 
 

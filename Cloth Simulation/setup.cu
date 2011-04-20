@@ -33,8 +33,11 @@
 
 extern int numCloths;
 
+<<<<<<< HEAD
 static const int threadsPerBlock = 256;
 
+=======
+>>>>>>> 1bc3a3d4a5defbfedcb0649fb9a4a22ebb729ad9
 int row	  = 40;
 int column = 40;
 unsigned int numTriangles = (row-1)*(column-1)*2;

@@ -194,7 +194,7 @@ int main(int argc, char **argv) {
 
     if(argc <= 1)
     {
-        numCloths = 1;
+        numCloths = 2;
     }
     else if(argc == 2)
     {

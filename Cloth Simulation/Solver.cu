@@ -65,6 +65,8 @@ void add_force(struct Particle *pVector, float3 gravity, bool wind, int row, int
 	
 	int x = index%row;
 	int y = index/column;
+
+	pVector[index].step(TIME_STEP);
 	
 	/* gravity */
 	pVector[index].addForce(gravity * TIME_STEP);
@@ -76,9 +78,6 @@ void add_force(struct Particle *pVector, float3 gravity, bool wind, int row, int
 		pVector[index].addForce( windForce(pVector, windDir, x, y, row) * 20 );
 	
 	}
-	
-	pVector[index].step(TIME_STEP);
-	
 }
 
 __global__

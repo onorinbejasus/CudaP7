@@ -44,16 +44,15 @@ public:
       // Successfully accepted a new connection. Send the list of triangles to the
       // client. The connection::async_write() function will automatically
       // serialize the data structure for us.
-		
       conn->async_write(mesh_,
           boost::bind(&server::handle_write, this,
-            boost::asio::placeholders::error, conn));
+					  boost::asio::placeholders::error, conn));
 
       // Start an accept operation for a new connection.
       connection_ptr new_conn(new connection(acceptor_.io_service()));
       acceptor_.async_accept(new_conn->socket(),
           boost::bind(&server::handle_accept, this,
-            boost::asio::placeholders::error, new_conn));
+            boost::asio::placeholders::error, new_conn)); 
     }
     else
     {

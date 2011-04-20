@@ -70,6 +70,7 @@ cuda_err.o : cuda_err.cu \
     /usr/include/c++/4.2.1/cmath \
     /usr/include/time.h \
     /usr/include/alloca.h \
+    /Users/mitchellluban/15668/CudaP7/network3/Server// \
     /usr/local/cuda/bin/../include/vector_functions.h \
     /usr/include/c++/4.2.1/cstddef \
     /usr/include/c++/4.2.1/cstdlib \

@@ -59,6 +59,7 @@ window.o : window.cc \
     /usr/include/i386/_limits.h \
     /usr/include/sys/resource.h \
     /usr/include/alloca.h \
+    /Users/mitchellluban/15668/CudaP7/network3/Server// \
     /usr/local/cuda/bin/../include/vector_functions.h \
     /usr/include/math.h \
     /usr/include/machine/_structs.h \
@@ -66,7 +67,6 @@ window.o : window.cc \
     /System/Library/Frameworks/GLUT.framework/Headers/glut.h \
     /usr/include/machine/_types.h \
     /usr/include/i386/_types.h \
-    Shaders.h \
     /usr/lib/gcc/i686-apple-darwin10/4.2.1/include/stddef.h \
     /usr/local/cuda/bin/../include/device_types.h \
     /System/Library/Frameworks/OpenGL.framework/Headers/gl.h

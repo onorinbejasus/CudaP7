@@ -9,12 +9,14 @@
 
 #include "imageio.hh"
 #include "Particle.hh"
+#include "Constraint.hh"
 
 #include "setup.hh"
 
 #include <stdlib.h>
 #include <stdio.h>
 #include <cmath>
+#include <vector>
 
 #define BLACK   0
 #define RED     1
@@ -38,6 +40,7 @@ int width = 8;
 int height = 4;
 
 struct Particle** pVector;
+static std::vector<Constraint*> constraints;
 
 GLuint *vbo;
 GLuint texVbo;
@@ -50,14 +53,17 @@ GLuint flagTexId;
 
 int size = row * column;
 
-extern void verlet_simulation_step(struct Particle* pVector, float4 *data_pointer, GLuint vbo, bool wind, int row, int column, int numCloth);
+extern void verlet_simulation_step(struct Particle* pVector, std::vector<Constraint*> constraints, 
+												float4 *data_pointer, GLuint vbo, int row, int column, bool wind, int numCloths);
 void deleteVBO(int numCloth);
 void deleteTexVBO();
 void deleteIndexVBO();
+
 extern bool dsim;
 extern bool wind;
 
 int getParticleInd(int x, int y, int row) { return y*row+x; }
+struct Particle *getParticle(int x, int y){ return &pVector[0][y*row+x]; }
 
 /*----------------------------------------------------------------------
 free/clear/allocate simulation data
@@ -78,6 +84,46 @@ void free_data ( void )
 
     free(flagIndexArray);
     free(flagTexArray);
+}
+/*--------------------------------------------------------------------
+					Make Constraints
+--------------------------------------------------------------------*/
+
+void make_constraints(void){
+	
+	for(int ii = 0; ii < row; ii++){
+		
+		for(int jj = 0; jj < column; jj++){
+						
+			/* neighbors */
+						
+			if(ii < row-1) // to the right
+				constraints.push_back(new Constraint(getParticle(ii,jj), getParticle(ii+1, jj)) );
+			
+			if(jj < column -1) // below	
+				constraints.push_back(new Constraint(getParticle(ii,jj), getParticle(ii,jj+1) ) );
+			
+			if(ii < row-1 && jj < column -1) // down right
+				constraints.push_back(new Constraint(getParticle(ii,jj), getParticle(ii+1,jj+1) ) );
+			
+			if(ii < row-1 && jj < column -1) // up right	
+				constraints.push_back( new Constraint(getParticle(ii+1,jj), getParticle(ii,jj+1) ) );
+			
+			/* neighbor's neighbors */
+			
+		 	if(ii < row-2) // to the right
+				constraints.push_back(new Constraint(getParticle(ii,jj), getParticle(ii+2, jj) ) );
+			
+			if(jj < column -2) // below	
+				constraints.push_back(new Constraint(getParticle(ii,jj), getParticle(ii,jj+2) ) );
+			
+			if(ii < row-2 && jj < column -2) // down right
+				constraints.push_back(new Constraint(getParticle(ii,jj), getParticle(ii+2,jj+2) ) );
+			
+			if(ii < row-2 && jj < column -2) // up right	
+				constraints.push_back( new Constraint(getParticle(ii+2,jj), getParticle(ii,jj+2) ) );
+		}	
+	}	
 }
 
 /*--------------------------------------------------------------------
@@ -195,7 +241,7 @@ void init_system(void)
         glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 4 * size, data_pointer, GL_DYNAMIC_DRAW);
 	
 	    make_particles(pVector[ii], data_pointer[ii], row, column, width, height); // create particles
-		
+		make_constraints();
 	    /* unmap vbo */
         glUnmapBuffer(vbo[ii]);
     }
@@ -294,7 +340,7 @@ void step_func ( )
     for(int ii = 0; ii < numCloths; ii++)
     {
 	    if ( dsim ){ // simulate
-		    verlet_simulation_step(pVector[ii], data_pointer[ii], vbo[ii], wind, row, column, ii);
+			verlet_simulation_step(pVector[ii], constraints, data_pointer[ii], vbo[ii], row, column, wind, numCloths);
 	    }
 	    else { // remap
 		

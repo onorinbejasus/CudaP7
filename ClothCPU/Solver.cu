@@ -7,14 +7,12 @@
 // 
 
 #include "Particle.hh"
-
-#include "open_gl.hh"
-
-#include <cutil.h>
+#include "Constraint.hh"
 
 #include <vector>
 #include <cstdlib>
 #include <cstdio>
+#include <vector>
 
 #define TIME_STEP 0.5*0.5 // how large time step each particle takes each frame
 #define CONSTRAINT_ITERATIONS 25 // how many iterations of constraint satisfaction each frame (more is rigid, less is soft)
@@ -24,13 +22,8 @@ extern void deleteVBO(int numCloth);
 
 const float3 gravity = make_float3(0.0f, -0.15f, 0.0f);
 
-int getParticle(int x, int y, int row){ return y*row+x; }
-
-/* find the normal of a triangle */
-
 float3 triangle_normal(float3 v1, float3 v2, float3 v3){ return ( cross(v2-v1, v3-v1) ); }
-
-/* apply the wind force to the cloth */
+int getParticle(int x, int y, int row){ return y*row+x; }
 
 float3 windForce(struct Particle *pVector, float3 windDir, int x, int y, int row)
 {
@@ -49,298 +42,27 @@ float3 windForce(struct Particle *pVector, float3 windDir, int x, int y, int row
 	return force;
 }
 
-void add_force(struct Particle *pVector, float3 gravity, bool wind, int row, int column){	
+void verlet_simulation_step(struct Particle* pVector, std::vector<Constraint*> constraints, 
+										float4 *data_pointer, GLuint vbo, int row, int column, bool wind, int numCloth){
 	
-    for(int index = 0; index < row*column; index++)
-    {
-	    int x = index%row;
-	    int y = index/column;
-	
-	    /* gravity */
-	    pVector[index].addForce(gravity * TIME_STEP);
-	
-	    if(wind && y < (column -1) && x < (row-1)){
-		    float3 windDir = make_float3(0.3f, 0.3f, 0.2f);
-	
-		    /* wind */
-		    pVector[index].addForce( windForce(pVector, windDir, x, y, row) * 10 ) ;
-	    }
-	
-	    pVector[index].step(TIME_STEP);
-    }
-}
-
-void satisfy(struct Particle *pVector, float4 *data_pointer, int row, int column){
-    for(int index = 0; index < row*column; index++)
-    {
-	    int ii = index%row;
-	    int jj = index/column;
-
-	    for(int i = 0; i < CONSTRAINT_ITERATIONS; i++){		
+	for(int ii = 0; ii < row * column; ii++){
+		pVector[ii].step(TIME_STEP);
 		
-		    if(ii < row-1){ // to the right
-
-			    int p1 = getParticle(ii,jj, row);
-			    int p2 = getParticle(ii+1, jj, row);
-
-			    float3 diff = pVector[p1].m_ConstructPos - pVector[p2].m_ConstructPos;
-			    float m_rest = length(diff);
-
-			    float3 p1_to_p2 = pVector[p2].m_Position - pVector[p1].m_Position; 
-			    float current_distance = length(p1_to_p2);
-			    float3 correctionVector = p1_to_p2*(1 - m_rest/current_distance); 
-			    float3 correctionVectorHalf = correctionVector*0.5; 
-
-			    if(current_distance > m_rest){
-
-				    pVector[p1].updateVector(correctionVectorHalf, data_pointer); 
-				    pVector[p2].updateVector(-correctionVectorHalf, data_pointer);
-
-			    } // end if
-
-			    if(!pVector[p1].m_movable){
-				
-				    pVector[p1].m_Position = pVector[p1].m_ConstructPos;
-				    data_pointer[p1] = make_float4(pVector[p1].m_ConstructPos, 1);
-			    }
-			    if(!pVector[p2].m_movable){
-				
-				    pVector[p2].m_Position = pVector[p2].m_ConstructPos;
-				    data_pointer[p2] = make_float4(pVector[p2].m_ConstructPos, 1);
-			    }
-
-		    }
-		    if(jj < column -1){ // below	
-
-			    int p1 = getParticle(ii,jj, row);
-			    int p2 = getParticle(ii, jj+1, row);
-
-			    float3 diff = pVector[p1].m_ConstructPos - pVector[p2].m_ConstructPos;
-			    float m_rest = length(diff);
-
-			    float3 p1_to_p2 = pVector[p2].m_Position - pVector[p1].m_Position; 
-			    float current_distance = length(p1_to_p2);
-			    float3 correctionVector = p1_to_p2*(1 - m_rest/current_distance); 
-			    float3 correctionVectorHalf = correctionVector*0.5; 
-
-			    if(current_distance > m_rest){
-
-				    pVector[p1].updateVector(correctionVectorHalf, data_pointer); 
-				    pVector[p2].updateVector(-correctionVectorHalf, data_pointer);
-
-			    } // end if
-
-			    if(!pVector[p1].m_movable){
-				
-				    pVector[p1].m_Position = pVector[p1].m_ConstructPos;
-				    data_pointer[p1] = make_float4(pVector[p1].m_ConstructPos, 1);
-			    }
-			    if(!pVector[p2].m_movable){
-				
-				    pVector[p2].m_Position = pVector[p2].m_ConstructPos;
-				    data_pointer[p2] = make_float4(pVector[p2].m_ConstructPos, 1);
-				
-			    }
-
-		    }
-		    if(ii < row-1 && jj < column -1){ // down right
-
-			    int p1 = getParticle(ii,jj, row);
-			    int p2 = getParticle(ii+1, jj+1, row);
-
-			    float3 diff = pVector[p1].m_ConstructPos - pVector[p2].m_ConstructPos;
-			    float m_rest = length(diff);
-
-			    float3 p1_to_p2 = pVector[p2].m_Position - pVector[p1].m_Position; 
-			    float current_distance = length(p1_to_p2);
-			    float3 correctionVector = p1_to_p2*(1 - m_rest/current_distance); 
-			    float3 correctionVectorHalf = correctionVector*0.5; 
-
-			    if(current_distance > m_rest){
-
-				    pVector[p1].updateVector(correctionVectorHalf, data_pointer); 
-				    pVector[p2].updateVector(-correctionVectorHalf, data_pointer);
-
-			    } // end if
-
-			    if(!pVector[p1].m_movable){
-				
-				    pVector[p1].m_Position = pVector[p1].m_ConstructPos;
-				    data_pointer[p1] = make_float4(pVector[p1].m_ConstructPos, 1);
-			    }
-			    if(!pVector[p2].m_movable){
-				
-				    pVector[p2].m_Position = pVector[p2].m_ConstructPos;
-				    data_pointer[p2] = make_float4(pVector[p2].m_ConstructPos, 1);
-				
-			    }		
-		    }
-		    if(ii < row-1 && jj < column -1){ // up right	
-
-			    int p1 = getParticle(ii+1,jj, row);
-			    int p2 = getParticle(ii, jj+1, row);
-
-			    float3 diff = pVector[p1].m_ConstructPos - pVector[p2].m_ConstructPos;
-			    float m_rest = length(diff);
-
-			    float3 p1_to_p2 = pVector[p2].m_Position - pVector[p1].m_Position; 
-			    float current_distance = length(p1_to_p2);
-			    float3 correctionVector = p1_to_p2*(1 - m_rest/current_distance); 
-			    float3 correctionVectorHalf = correctionVector*0.5; 
-
-			    if(current_distance > m_rest){
-
-				    pVector[p1].updateVector(correctionVectorHalf, data_pointer); 
-				    pVector[p2].updateVector(-correctionVectorHalf, data_pointer);
-
-			    } // end if
-
-			    if(!pVector[p1].m_movable){
-				
-				    pVector[p1].m_Position = pVector[p1].m_ConstructPos;
-				    data_pointer[p1] = make_float4(pVector[p1].m_ConstructPos, 1);
-			    }
-			    if(!pVector[p2].m_movable){
-				
-				    pVector[p2].m_Position = pVector[p2].m_ConstructPos;
-				    data_pointer[p2] = make_float4(pVector[p2].m_ConstructPos, 1);
-				
-			    }	
-		    }
-		    /* neighbor's neighbors */
-
-	 	    if(ii < row-2){ // to the right
-
-			    int p1 = getParticle(ii,jj, row);
-			    int p2 = getParticle(ii+2, jj, row);
-
-			    float3 diff = pVector[p1].m_ConstructPos - pVector[p2].m_ConstructPos; 
-			    float m_rest = length(diff);
-
-			    float3 p1_to_p2 = pVector[p2].m_Position - pVector[p1].m_Position; 
-			    float current_distance = length(p1_to_p2);
-			    float3 correctionVector = p1_to_p2*(1 - m_rest/current_distance); 
-			    float3 correctionVectorHalf = correctionVector*0.5; 
-
-			    if(current_distance > m_rest){
-
-				    pVector[p1].updateVector(correctionVectorHalf, data_pointer); 
-				    pVector[p2].updateVector(-correctionVectorHalf, data_pointer);
-
-			    } // end if
-
-			    if(!pVector[p1].m_movable){
-				
-				    pVector[p1].m_Position = pVector[p1].m_ConstructPos;
-				    data_pointer[p1] = make_float4(pVector[p1].m_ConstructPos, 1);
-			    }
-			    if(!pVector[p2].m_movable){
-				
-				    pVector[p2].m_Position = pVector[p2].m_ConstructPos;
-				    data_pointer[p2] = make_float4(pVector[p2].m_ConstructPos, 1);
-				
-			    }		
-		    }
-		    if(jj < column -2){ // below	
-
-			    int p1 = getParticle(ii,jj, row);
-			    int p2 = getParticle(ii, jj+2, row);
-
-			    float3 diff = pVector[p1].m_ConstructPos - pVector[p2].m_ConstructPos;
-			    float m_rest = length(diff);
-
-			    float3 p1_to_p2 = pVector[p2].m_Position - pVector[p1].m_Position; 
-			    float current_distance = length(p1_to_p2);
-			    float3 correctionVector = p1_to_p2*(1 - m_rest/current_distance); 
-			    float3 correctionVectorHalf = correctionVector*0.5; 
-
-			    if(current_distance > m_rest){
-
-				    pVector[p1].updateVector(correctionVectorHalf, data_pointer); 
-				    pVector[p2].updateVector(-correctionVectorHalf, data_pointer);
-
-			    } // end if
-
-			    if(!pVector[p1].m_movable){
-				
-				    pVector[p1].m_Position = pVector[p1].m_ConstructPos;
-				    data_pointer[p1] = make_float4(pVector[p1].m_ConstructPos, 1);
-			    }
-			    if(!pVector[p2].m_movable){
-				
-				    pVector[p2].m_Position = pVector[p2].m_ConstructPos;
-				    data_pointer[p2] = make_float4(pVector[p2].m_ConstructPos, 1);
-				
-			    }
-		    }
-
-		    if(ii < row-2 && jj < column -2){ // down right
-
-			    int p1 = getParticle(ii,jj, row);
-			    int p2 = getParticle(ii+2, jj+2, row);
-
-			    float3 diff = pVector[p1].m_ConstructPos - pVector[p2].m_ConstructPos;
-			    float m_rest = length(diff);
-
-			    float3 p1_to_p2 = pVector[p2].m_Position - pVector[p1].m_Position; 
-			    float current_distance = length(p1_to_p2);
-			    float3 correctionVector = p1_to_p2*(1 - m_rest/current_distance); 
-			    float3 correctionVectorHalf = correctionVector*0.5; 
-
-			    if(current_distance > m_rest){
-
-				    pVector[p1].updateVector(correctionVectorHalf, data_pointer); 
-				    pVector[p2].updateVector(-correctionVectorHalf, data_pointer);
-
-			    } // end if
-
-			    if(!pVector[p1].m_movable)
-				    pVector[p1].m_Position = pVector[p1].m_ConstructPos;
-
-			    if(!pVector[p2].m_movable)
-				    pVector[p2].m_Position = pVector[p2].m_ConstructPos;
-		    }
-
-		    if(ii < row-2 && jj < column -2){ // up right	
-
-			    int p1 = getParticle(ii+2,jj, row);
-			    int p2 = getParticle(ii, jj+2, row);
-
-			    float3 diff = pVector[p1].m_ConstructPos - pVector[p2].m_ConstructPos;
-			    float m_rest = length(diff);
-
-			    float3 p1_to_p2 = pVector[p2].m_Position - pVector[p1].m_Position; 
-			    float current_distance = length(p1_to_p2);
-			    float3 correctionVector = p1_to_p2*(1 - m_rest/current_distance); 
-			    float3 correctionVectorHalf = correctionVector*0.5; 
-
-			    if(current_distance > m_rest){
-
-				    pVector[p1].updateVector(correctionVectorHalf, data_pointer); 
-				    pVector[p2].updateVector(-correctionVectorHalf, data_pointer);
-
-			    } // end if
-
-			    if(!pVector[p1].m_movable){
-				
-				    pVector[p1].m_Position = pVector[p1].m_ConstructPos;
-				    data_pointer[p1] = make_float4(pVector[p1].m_ConstructPos, 1);
-			    }
-			    if(!pVector[p2].m_movable){
-				
-				    pVector[p2].m_Position = pVector[p2].m_ConstructPos;
-				    data_pointer[p2] = make_float4(pVector[p2].m_ConstructPos, 1);	
-			    }	
-            }
-		}	
-	}
-}
-
-void verlet_simulation_step(struct Particle* pVector, float4 *data_pointer, GLuint vbo, bool wind, int row, int column, int numCloth){
-				
-	/* apply wind and gravity forces */	
-	add_force(pVector, gravity, wind, row, column);
+		pVector[ii].addForce(gravity * TIME_STEP);
 		
+		int x = ii%row;
+		int y = ii/column;
+		
+		if(wind && y < (column -1) && x < (row-1)){
+			
+			float3 windDir = make_float3(0.3f, 0.3f, 0.2f);	
+			/* wind */
+			pVector[ii].addForce( windForce(pVector, windDir, x, y, row) * 10 );
+
+		}
+		
+	} // end for
+	
 	// remove old 
 	deleteVBO(numCloth);
 	
@@ -350,10 +72,14 @@ void verlet_simulation_step(struct Particle* pVector, float4 *data_pointer, GLui
 	/* map vbo */
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 4 * row * column, data_pointer, GL_DYNAMIC_DRAW);
-
- 	satisfy(pVector, data_pointer, row, column);
 	
-	/* unmap vbo */
-    glUnmapBuffer(vbo);
-				
+	for(int ii = 0; ii < CONSTRAINT_ITERATIONS; ii++){
+		
+		for(int jj = 0; jj < constraints.size(); jj++){
+			
+			constraints[jj]->satisfy(data_pointer);
+			
+		} // end for jj	
+	}	// end for ii
+	
 } // end sim step

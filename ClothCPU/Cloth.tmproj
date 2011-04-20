@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>currentDocument</key>
-	<string>setup.cu</string>
+	<string>Solver.cu</string>
 	<key>documents</key>
 	<array>
 		<dict>
@@ -21,19 +21,47 @@
 	<integer>136</integer>
 	<key>metaData</key>
 	<dict>
+		<key>Constraint.cu</key>
+		<dict>
+			<key>caret</key>
+			<dict>
+				<key>column</key>
+				<integer>63</integer>
+				<key>line</key>
+				<integer>37</integer>
+			</dict>
+			<key>firstVisibleColumn</key>
+			<integer>0</integer>
+			<key>firstVisibleLine</key>
+			<integer>0</integer>
+		</dict>
+		<key>Constraint.hh</key>
+		<dict>
+			<key>caret</key>
+			<dict>
+				<key>column</key>
+				<integer>43</integer>
+				<key>line</key>
+				<integer>23</integer>
+			</dict>
+			<key>firstVisibleColumn</key>
+			<integer>0</integer>
+			<key>firstVisibleLine</key>
+			<integer>0</integer>
+		</dict>
 		<key>Particle.hh</key>
 		<dict>
 			<key>caret</key>
 			<dict>
 				<key>column</key>
-				<integer>28</integer>
+				<integer>1</integer>
 				<key>line</key>
 				<integer>81</integer>
 			</dict>
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
-			<integer>39</integer>
+			<integer>52</integer>
 		</dict>
 		<key>Shaders.cc</key>
 		<dict>
@@ -48,20 +76,6 @@
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
 			<integer>32</integer>
-		</dict>
-		<key>Shaders.d</key>
-		<dict>
-			<key>caret</key>
-			<dict>
-				<key>column</key>
-				<integer>0</integer>
-				<key>line</key>
-				<integer>0</integer>
-			</dict>
-			<key>firstVisibleColumn</key>
-			<integer>0</integer>
-			<key>firstVisibleLine</key>
-			<integer>0</integer>
 		</dict>
 		<key>Shaders.h</key>
 		<dict>
@@ -84,26 +98,12 @@
 				<key>column</key>
 				<integer>1</integer>
 				<key>line</key>
-				<integer>80</integer>
+				<integer>34</integer>
 			</dict>
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
-			<integer>90</integer>
-		</dict>
-		<key>Solver.d</key>
-		<dict>
-			<key>caret</key>
-			<dict>
-				<key>column</key>
-				<integer>0</integer>
-				<key>line</key>
-				<integer>0</integer>
-			</dict>
-			<key>firstVisibleColumn</key>
-			<integer>0</integer>
-			<key>firstVisibleLine</key>
-			<integer>0</integer>
+			<integer>26</integer>
 		</dict>
 		<key>cuda_err.cu</key>
 		<dict>
@@ -175,20 +175,6 @@
 			<key>firstVisibleLine</key>
 			<integer>0</integer>
 		</dict>
-		<key>imageio.d</key>
-		<dict>
-			<key>caret</key>
-			<dict>
-				<key>column</key>
-				<integer>0</integer>
-				<key>line</key>
-				<integer>0</integer>
-			</dict>
-			<key>firstVisibleColumn</key>
-			<integer>0</integer>
-			<key>firstVisibleLine</key>
-			<integer>0</integer>
-		</dict>
 		<key>main.cc</key>
 		<dict>
 			<key>caret</key>
@@ -236,14 +222,14 @@
 			<key>caret</key>
 			<dict>
 				<key>column</key>
-				<integer>0</integer>
+				<integer>24</integer>
 				<key>line</key>
-				<integer>16</integer>
+				<integer>11</integer>
 			</dict>
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
-			<integer>12</integer>
+			<integer>5</integer>
 		</dict>
 		<key>setup.hh</key>
 		<dict>
@@ -291,9 +277,10 @@
 	<key>openDocuments</key>
 	<array>
 		<string>cuda_helpers.hh</string>
-		<string>Solver.cu</string>
 		<string>window.cc</string>
 		<string>setup.cu</string>
+		<string>Solver.cu</string>
+		<string>Constraint.hh</string>
 		<string>Shaders.h</string>
 		<string>Shaders.cc</string>
 		<string>setup.hh</string>
@@ -302,6 +289,7 @@
 		<string>makefile.osx</string>
 		<string>open_gl.hh</string>
 		<string>Particle.hh</string>
+		<string>Constraint.cu</string>
 		<string>cuda_err.cu</string>
 		<string>cuda_err.hh</string>
 		<string>imageio.cc</string>

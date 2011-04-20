@@ -8,10 +8,7 @@
 
 #pragma once
 
-#include "Constraint.h"
-#include "Particle.h"
-#include "Particle.h"
-#include "gfx/vec3.h"
+#include "Particle.hh"
 
 #include "cmath"
 
@@ -24,8 +21,8 @@ private:
 	
 public:
 	Constraint(){} // default constructor
-	Constraint(Particle *part1, Particle *part2); // constructor
+	Constraint(struct Particle *part1, struct Particle *part2); // constructor
 	~Constraint(); // destructor
-	void satisfy(); // satisfy constaints
+	void satisfy(float4 *data_pointer); // satisfy constaints
 	
 }; // end constraint class

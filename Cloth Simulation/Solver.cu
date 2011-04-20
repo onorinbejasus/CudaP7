@@ -372,6 +372,8 @@ void verlet_simulation_step(struct Particle* pVector, float4 *data_pointer, GLui
 	cudaGLMapBufferObject((void**)&data_pointer, vbo);
 				
  	satisfy<<<nBlocks, threadsPerBlock>>>(pVector, data_pointer, row, column);
+
+	cudaThreadSynchronize();
 	
 	/* unmap vbo */
 	cudaGLUnmapBufferObject(vbo);

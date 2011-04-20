@@ -17,7 +17,7 @@
  *   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#include "PracticalSocket.hpp"
+#include "PracticalSocket.h"
 
 #ifdef WIN32
   #include <winsock.h>         // For socket(), connect(), send(), and recv()

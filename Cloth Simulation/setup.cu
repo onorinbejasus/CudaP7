@@ -33,8 +33,10 @@
 
 extern int numCloths;
 
-int row	  = 60;
-int column = 60;
+static const int threadsPerBlock = 256;
+
+int row	  = 40;
+int column = 40;
 unsigned int numTriangles = (row-1)*(column-1)*2;
 
 int width = 8;
@@ -206,12 +208,13 @@ void init_system(void)
 	    cudaGLMapBufferObject((void**)&(data_pointer[ii]), vbo[ii]);
 	
 	    /* create and copy */
-	    const int threadsPerBlock = 64;
 	    int totalThreads = row * column;
 	    int nBlocks = totalThreads/threadsPerBlock;
 	    nBlocks += ((totalThreads % threadsPerBlock) > 0) ? 1 : 0;
 	
 	    make_particles<<<nBlocks, threadsPerBlock>>>(pVector[ii], data_pointer[ii], row, column, width, height); // create particles
+
+        cudaThreadSynchronize();
 		
 	    /* unmap vbo */
 	    cudaGLUnmapBufferObject(vbo[ii]);
@@ -338,12 +341,13 @@ void step_func ( )
 		    /* map vbo in cuda */
 		    cudaGLMapBufferObject((void**)&(data_pointer[ii]), vbo[ii]);
 		
-		    const int threadsPerBlock = 64;
 		    int totalThreads = row * column;
 		    int nBlocks = totalThreads/threadsPerBlock;
 		    nBlocks += ((totalThreads % threadsPerBlock) > 0) ? 1 : 0;
 		
 		    remap_GUI<<<nBlocks, threadsPerBlock>>>(pVector[ii], data_pointer[ii]);
+
+            cudaThreadSynchronize();
 		
 		    /* unmap vbo */
 		    cudaGLUnmapBufferObject(vbo[ii]);

@@ -17,16 +17,16 @@
  *   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#include "PracticalSocket.h"   // For UDPSocket and SocketException
-#include <iostream>            // For cout and cerr
-#include <cstdlib>             // For atoi()
+#include "PracticalSocket.h" // For UDPSocket and SocketException
+#include <iostream>          // For cout and cerr
+#include <cstdlib>           // For atoi()
 
-const int MAXRCVSTRING = 4096; // Longest string to receive
+const int ECHOMAX = 255;     // Longest string to echo
 
 int main(int argc, char *argv[]) {
 
   if (argc != 2) {                  // Test for correct number of parameters
-    cerr << "Usage: " << argv[0] << " <Local Port>" << endl;
+    cerr << "Usage: " << argv[0] << " <Server Port>" << endl;
     exit(1);
   }
 
@@ -35,24 +35,25 @@ int main(int argc, char *argv[]) {
   try {
     UDPSocket sock(echoServPort);                
   
-    // char recvString[MAXRCVSTRING + 1]; // Buffer for echo string + \0
-    int recvNum;
-    string sourceAddress;              // Address of datagram source
-    unsigned short sourcePort;         // Port of datagram source
-
-    while(true)
-    {
-        int bytesRcvd = sock.recvFrom(&recvNum, 4, sourceAddress, 
-                                  sourcePort);
-        // recvString[bytesRcvd] = '\0';  // Terminate string
-    
-        cout << "Received " << recvNum << " from " << sourceAddress << ": "
-             << sourcePort << endl;
+    char echoBuffer[ECHOMAX];         // Buffer for echo string
+    int recvMsgSize;                  // Size of received message
+    string sourceAddress;             // Address of datagram source
+    unsigned short sourcePort;        // Port of datagram source
+    for (;;) {  // Run forever
+      // Block until receive message from a client
+      recvMsgSize = sock.recvFrom(echoBuffer, ECHOMAX, sourceAddress, 
+                                      sourcePort);
+  
+      cout << "Received packet from " << sourceAddress << ":" 
+           << sourcePort << endl;
+  
+      sock.sendTo(echoBuffer, recvMsgSize, sourceAddress, sourcePort);
     }
   } catch (SocketException &e) {
     cerr << e.what() << endl;
     exit(1);
   }
+  // NOT REACHED
 
   return 0;
 }

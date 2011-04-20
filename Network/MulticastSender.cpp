@@ -28,34 +28,39 @@ void sleep(unsigned int seconds) {::Sleep(seconds * 1000);}
 #include <unistd.h>           // For sleep()
 #endif
 
+
 using namespace std;
 
 int main(int argc, char *argv[]) {
-  if ((argc < 3) || (argc > 4)) {   // Test for correct number of arguments
+  if ((argc < 4) || (argc > 5)) {   // Test for correct number of arguments
     cerr << "Usage: " << argv[0] 
-         << " <Destination Address> <Destination Port> <Send String>\n";
+         << " <Destination Address> <Destination Port> <Send String> [<TTL>]\n";
     exit(1);
   }
 
-  string destAddress = argv[1];             // First arg:  destination address
-  unsigned short destPort = atoi(argv[2]);  // Second arg: destination port
-  char* sendString = argv[3];               // Third arg:  string to broadcast
+  string servAddress = argv[1];         // First arg: multicast address
+  unsigned short port = atoi(argv[2]);  // Second arg: port
+  char* sendString = argv[3];           // Third arg: string to echo
+
+  unsigned char multicastTTL = 1;       // Default TTL
+  if (argc == 5) {
+    multicastTTL = atoi(argv[4]);       // Command-line TTL
+  }
 
   try {
     UDPSocket sock;
-  
-    int num = 0;
 
-    // Repeatedly send the string (not including \0) to the server
+    sock.setMulticastTTL(multicastTTL);
+
+    // Repeatedly send the string to the server
     for (;;) {
-      sock.sendTo(&num, 4, destAddress, destPort);
-      num++;
+      sock.sendTo(sendString, strlen(sendString), servAddress, port);
       sleep(3);
     }
   } catch (SocketException &e) {
     cerr << e.what() << endl;
     exit(1);
   }
-  
+
   return 0;
 }

@@ -1,22 +1,22 @@
-networking.o : networking.cpp \
+imageio.o : imageio.cc \
+    /usr/X11/include/pngconf.h \
     /usr/include/mach/i386/_structs.h \
     /usr/include/machine/types.h \
     /usr/include/sys/cdefs.h \
+    /usr/include/setjmp.h \
     /usr/include/sys/signal.h \
-    /usr/lib/gcc/i686-apple-darwin10/4.2.1/include/stdint.h \
-    /usr/include/errno.h \
     /usr/include/machine/endian.h \
     /usr/include/i386/endian.h \
-    /usr/include/arpa/inet.h \
     /usr/include/AvailabilityInternal.h \
     /usr/include/sys/_select.h \
     /usr/include/i386/types.h \
+    /usr/X11/include/png.h \
     /usr/include/stdio.h \
-    /usr/include/fcntl.h \
     /usr/include/i386/_structs.h \
-    /usr/include/netinet/in.h \
+    imageio.hh \
     /usr/include/stdlib.h \
     /usr/include/sys/_structs.h \
+    /usr/include/_structs.h \
     /usr/include/sys/select.h \
     /usr/include/sys/_types.h \
     /usr/include/Availability.h \
@@ -26,24 +26,19 @@ networking.o : networking.cpp \
     /usr/include/sys/unistd.h \
     /usr/include/libkern/i386/_OSByteOrder.h \
     /usr/include/unistd.h \
+    /usr/include/machine/setjmp.h \
     /usr/include/machine/signal.h \
-    networking.hh \
+    /usr/include/i386/setjmp.h \
+    /usr/local/include/zlib.h \
     /usr/include/i386/signal.h \
     /usr/include/sys/appleapiopts.h \
-    /usr/include/sys/errno.h \
-    /usr/include/netdb.h \
     /usr/include/libkern/_OSByteOrder.h \
-    /usr/include/machine/_param.h \
-    /usr/include/i386/_param.h \
     /usr/include/string.h \
     /usr/include/sys/resource.h \
-    /usr/lib/gcc/i686-apple-darwin10/4.2.1/include/stdarg.h \
+    /usr/include/time.h \
     /usr/include/alloca.h \
     /usr/include/machine/_structs.h \
-    /usr/include/netinet6/in6.h \
-    /usr/include/assert.h \
-    /usr/include/sys/fcntl.h \
     /usr/include/machine/_types.h \
     /usr/include/i386/_types.h \
-    /usr/include/sys/types.h \
-    /usr/include/sys/socket.h
+    /usr/local/include/zconf.h \
+    /usr/include/sys/types.h

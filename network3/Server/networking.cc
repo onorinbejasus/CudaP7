@@ -123,7 +123,6 @@ int setup_socket(int port){
 	//printf("I am a server listening on ip address %s port %d for clients\n", ip, port);
 	
 	return sock;
-
 }
 
 ssize_t readline(int sockd, void *vptr, size_t maxlen) {

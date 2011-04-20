@@ -45,7 +45,7 @@ void computeFPS()
 	if (fpsCount == fpsLimit) {
 		char fps[256];
 		float ifps = 1.f / (cutGetAverageTimerValue(timer) / 1000.f);
-		sprintf(fps, "GPU CLOTH", ifps);	
+		sprintf(fps, "151-668 Project 7", ifps);	
 		
 		glutSetWindowTitle(fps);
 		fpsCount = 0; 

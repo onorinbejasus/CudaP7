@@ -73,7 +73,7 @@ void add_force(struct Particle *pVector, float3 gravity, bool wind, int row, int
 		float3 windDir = make_float3(0.3f, 0.3f, 0.2f);
 	
 		/* wind */
-		pVector[index].addForce( windForce(pVector, windDir, x, y, row) * 10 ) ;
+		pVector[index].addForce( windForce(pVector, windDir, x, y, row) * 10 );
 	
 	}
 	

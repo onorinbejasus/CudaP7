@@ -57,7 +57,7 @@ void verlet_simulation_step(struct Particle* pVector, std::vector<Constraint*> c
 			
 			float3 windDir = make_float3(0.3f, 0.3f, 0.2f);	
 			/* wind */
-			pVector[ii].addForce( windForce(pVector, windDir, x, y, row) * 10 );
+			pVector[ii].addForce( windForce(pVector, windDir, x, y, row) * 20 );
 
 		}
 		

@@ -33,8 +33,8 @@
 
 extern int numCloths;
 
-int row	  = 40;
-int column = 40;
+int row	  = 60;
+int column = 60;
 unsigned int numTriangles = (row-1)*(column-1)*2;
 
 int width = 8;

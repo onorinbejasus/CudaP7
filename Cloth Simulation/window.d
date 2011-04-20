@@ -1,4 +1,4 @@
-window.o : window.cpp \
+window.o : window.cc \
     /Developer/GPU\ Computing/C/common/inc/cutil_inline.h \
     /usr/include/mach/i386/_structs.h \
     /usr/local/cuda/bin/../include/driver_functions.h \
@@ -62,9 +62,11 @@ window.o : window.cpp \
     /usr/local/cuda/bin/../include/vector_functions.h \
     /usr/include/math.h \
     /usr/include/machine/_structs.h \
+    setup.hh \
     /System/Library/Frameworks/GLUT.framework/Headers/glut.h \
     /usr/include/machine/_types.h \
     /usr/include/i386/_types.h \
+    Shaders.h \
     /usr/lib/gcc/i686-apple-darwin10/4.2.1/include/stddef.h \
     /usr/local/cuda/bin/../include/device_types.h \
     /System/Library/Frameworks/OpenGL.framework/Headers/gl.h

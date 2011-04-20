@@ -97,7 +97,7 @@ void computeFPS()
 	if (fpsCount == fpsLimit) {
 		char fps[256];
 		float ifps = 1.f / (cutGetAverageTimerValue(timer) / 1000.f);
-		sprintf(fps, "15-668 - Project 1: %3.1f fps ", ifps);	
+		sprintf(fps, "GPU CLOTH", ifps);	
 		
 		glutSetWindowTitle(fps);
 		fpsCount = 0; 
@@ -151,7 +151,7 @@ CUTBoolean initGL(int argc, char **argv)
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE);
 	glutInitWindowSize(window_width, window_height);
-	glutCreateWindow("15-668 - Project 1");
+	glutCreateWindow("GPU");
 	glutDisplayFunc(fpsDisplay);
 	glutKeyboardFunc(keyboard);
 	glutMotionFunc(motion);

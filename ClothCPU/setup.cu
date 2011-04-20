@@ -32,8 +32,8 @@
 
 extern int numCloths;
 
-int row	  = 60;
-int column = 60;
+int row	  = 40;
+int column = 40;
 unsigned int numTriangles = (row-1)*(column-1)*2;
 
 int width = 8;
@@ -217,7 +217,6 @@ void make_flag_mesh( void )
 
     printf("currIndex = %i\n", currIndex);
 }
-
 
 /*--------------------------------------------------------------------
 					Initialize System

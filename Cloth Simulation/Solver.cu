@@ -27,7 +27,7 @@ extern void createVBO(int numCloth);
 extern void deleteVBO(int numCloth);
 
 const float3 gravity = make_float3(0.0f, -0.15f, 0.0f);
-static const int threadsPerBlock = 128;
+static const int threadsPerBlock = 64;
 
 __device__ __host__
 int getParticle(int x, int y, int row){ return y*row+x; }
@@ -367,11 +367,11 @@ void verlet_simulation_step(struct Particle* pVector, float4 *data_pointer, GLui
 	cudaThreadSynchronize();
 	
 	// remove old 
-	deleteVBO(numCloth);
-	data_pointer = 0;
+	// deleteVBO(numCloth);
+	// data_pointer = 0;
 	
 	/* initialize VBO */
-	createVBO(numCloth);
+	// createVBO(numCloth);
 	
 	/* map vbo in cuda */
 	cudaGLMapBufferObject((void**)&data_pointer, vbo);

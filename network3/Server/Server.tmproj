@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>documents</key>
+	<array>
+		<dict>
+			<key>filename</key>
+			<string>Mesh.cpp</string>
+		</dict>
+		<dict>
+			<key>filename</key>
+			<string>Mesh.hh</string>
+		</dict>
+		<dict>
+			<key>filename</key>
+			<string>myserver.cpp</string>
+		</dict>
+		<dict>
+			<key>filename</key>
+			<string>myserver.hh</string>
+		</dict>
+		<dict>
+			<key>filename</key>
+			<string>networking.cpp</string>
+		</dict>
+		<dict>
+			<key>filename</key>
+			<string>networking.hh</string>
+		</dict>
+		<dict>
+			<key>filename</key>
+			<string>data.hh</string>
+			<key>selected</key>
+			<true/>
+		</dict>
+	</array>
+	<key>fileHierarchyDrawerWidth</key>
+	<integer>200</integer>
+	<key>metaData</key>
+	<dict/>
+	<key>showFileHierarchyDrawer</key>
+	<true/>
+	<key>windowFrame</key>
+	<string>{{306, 0}, {1066, 778}}</string>
+</dict>
+</plist>

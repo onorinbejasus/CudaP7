@@ -47,17 +47,18 @@ int main(int argc, char *argv[]) {
         int bytesRcvd = sock.recvFrom(&recvNum, 4, sourceAddress, 
                                   sourcePort);
         
-		struct m_triangle *mesh = (struct m_triangle*)malloc(sizeof(struct m_triangle) * recvNum); 
+		struct m_triangle mesh[100];
 		
-		sock.recvFrom(&mesh, recvNum, sourceAddress, sourcePort);
+		sock.recvFrom(&mesh, recvNum/2, sourceAddress, sourcePort);
+		sock.recvFrom(&mesh[(recvNum/2)+1], recvNum/2, sourceAddress, sourcePort);
 
 		// recvString[bytesRcvd] = '\0';  // Terminate string
     
-        cout << "Received " << recvNum << " from " << sourceAddress << ": "
-             << sourcePort << endl;
+//        cout << "Received " << recvNum << " from " << sourceAddress << ": "
+  //           << sourcePort << endl;
 
-		for(int ii = 0; ii < recvNum; ii++){
-			std::cout << mesh[ii].vertices[ii][0] << std::endl;
+		for(int ii = 0; ii < 100; ii++){
+			std::cout << mesh[ii].vertices[0][0] << std::endl;
 		}
 		
 //    }

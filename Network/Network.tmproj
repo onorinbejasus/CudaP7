@@ -3,98 +3,168 @@
 <plist version="1.0">
 <dict>
 	<key>currentDocument</key>
-	<string>../../../../../../../../Document/Classes/Spring 2011/CMU CUDA/Projects/Project7/CudaP7/Network/EchoServer.cpp</string>
+	<string>../../../../../../../../Document/Classes/Spring 2011/CMU CUDA/Projects/Project7/CudaP7/Network/Sender/BroadcastSender.cpp</string>
 	<key>documents</key>
 	<array>
 		<dict>
 			<key>filename</key>
-			<string>../../../../../../../../Document/Classes/Spring 2011/CMU CUDA/Projects/Project7/CudaP7/Network/PracticalSocket.cpp</string>
+			<string>../../../../../../../../Document/Classes/Spring 2011/CMU CUDA/Projects/Project7/CudaP7/Network/Receiver/BroadcastReceiver.cpp</string>
 			<key>lastUsed</key>
-			<date>2011-04-20T05:34:01Z</date>
+			<date>2011-04-20T08:07:06Z</date>
 		</dict>
 		<dict>
 			<key>filename</key>
-			<string>../../../../../../../../Document/Classes/Spring 2011/CMU CUDA/Projects/Project7/CudaP7/Network/PracticalSocket.hpp</string>
+			<string>../../../../../../../../Document/Classes/Spring 2011/CMU CUDA/Projects/Project7/CudaP7/Network/Receiver/data.hh</string>
 			<key>lastUsed</key>
-			<date>2011-04-20T02:58:40Z</date>
+			<date>2011-04-20T07:12:26Z</date>
 		</dict>
 		<dict>
 			<key>filename</key>
-			<string>../../../../../../../../Document/Classes/Spring 2011/CMU CUDA/Projects/Project7/CudaP7/Network/makefile</string>
-		</dict>
-		<dict>
-			<key>filename</key>
-			<string>../../../../../../../../Document/Classes/Spring 2011/CMU CUDA/Projects/Project7/CudaP7/Network/BroadcastReceiver.cpp</string>
+			<string>../../../../../../../../Document/Classes/Spring 2011/CMU CUDA/Projects/Project7/CudaP7/Network/Sender/BroadcastSender.cpp</string>
 			<key>lastUsed</key>
-			<date>2011-04-20T05:33:59Z</date>
-		</dict>
-		<dict>
-			<key>filename</key>
-			<string>../../../../../../../../Document/Classes/Spring 2011/CMU CUDA/Projects/Project7/CudaP7/Network/BroadcastSender.cpp</string>
-			<key>lastUsed</key>
-			<date>2011-04-20T05:34:04Z</date>
-		</dict>
-		<dict>
-			<key>filename</key>
-			<string>../../../../../../../../Document/Classes/Spring 2011/CMU CUDA/Projects/Project7/CudaP7/Network/EchoServer.cpp</string>
-			<key>lastUsed</key>
-			<date>2011-04-20T05:34:04Z</date>
+			<date>2011-04-20T10:11:22Z</date>
 			<key>selected</key>
 			<true/>
+		</dict>
+		<dict>
+			<key>filename</key>
+			<string>../../../../../../../../Document/Classes/Spring 2011/CMU CUDA/Projects/Project7/CudaP7/Network/Sender/data.hh</string>
+			<key>lastUsed</key>
+			<date>2011-04-20T07:12:24Z</date>
+		</dict>
+		<dict>
+			<key>filename</key>
+			<string>../../../../../../../../Document/Classes/Spring 2011/CMU CUDA/Projects/Project7/CudaP7/Network/Sender/Mesh.hh</string>
+			<key>lastUsed</key>
+			<date>2011-04-20T07:12:09Z</date>
+		</dict>
+		<dict>
+			<key>filename</key>
+			<string>../../../../../../../../Document/Classes/Spring 2011/CMU CUDA/Projects/Project7/CudaP7/Network/Sender/Mesh.cpp</string>
+			<key>lastUsed</key>
+			<date>2011-04-20T07:36:12Z</date>
+		</dict>
+		<dict>
+			<key>filename</key>
+			<string>../../../../../../../../Document/Classes/Spring 2011/CMU CUDA/Projects/Project7/CudaP7/Network/Sender/PracticalSocket.cpp</string>
+			<key>lastUsed</key>
+			<date>2011-04-20T08:04:18Z</date>
+		</dict>
+		<dict>
+			<key>filename</key>
+			<string>../../../../../../../../Document/Classes/Spring 2011/CMU CUDA/Projects/Project7/CudaP7/Network/Sender/PracticalSocket.h</string>
+			<key>lastUsed</key>
+			<date>2011-04-20T07:51:13Z</date>
 		</dict>
 	</array>
 	<key>fileHierarchyDrawerWidth</key>
 	<integer>200</integer>
 	<key>metaData</key>
 	<dict>
-		<key>../../../../../../../../Document/Classes/Spring 2011/CMU CUDA/Projects/Project7/CudaP7/Network/BroadcastReceiver.cpp</key>
+		<key>../../../../../../../../Document/Classes/Spring 2011/CMU CUDA/Projects/Project7/CudaP7/Network/Receiver/BroadcastReceiver.cpp</key>
 		<dict>
 			<key>caret</key>
 			<dict>
 				<key>column</key>
-				<integer>29</integer>
+				<integer>35</integer>
 				<key>line</key>
-				<integer>19</integer>
+				<integer>52</integer>
 			</dict>
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
-			<integer>1</integer>
+			<integer>31</integer>
 		</dict>
-		<key>../../../../../../../../Document/Classes/Spring 2011/CMU CUDA/Projects/Project7/CudaP7/Network/BroadcastSender.cpp</key>
+		<key>../../../../../../../../Document/Classes/Spring 2011/CMU CUDA/Projects/Project7/CudaP7/Network/Receiver/data.hh</key>
 		<dict>
 			<key>caret</key>
 			<dict>
 				<key>column</key>
-				<integer>29</integer>
+				<integer>0</integer>
 				<key>line</key>
-				<integer>19</integer>
+				<integer>11</integer>
 			</dict>
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
-			<integer>8</integer>
-		</dict>
-		<key>../../../../../../../../Document/Classes/Spring 2011/CMU CUDA/Projects/Project7/CudaP7/Network/EchoServer.cpp</key>
-		<dict>
-			<key>caret</key>
-			<dict>
-				<key>column</key>
-				<integer>14</integer>
-				<key>line</key>
-				<integer>55</integer>
-			</dict>
-			<key>firstVisibleColumn</key>
 			<integer>0</integer>
-			<key>firstVisibleLine</key>
-			<integer>19</integer>
 		</dict>
-		<key>../../../../../../../../Document/Classes/Spring 2011/CMU CUDA/Projects/Project7/CudaP7/Network/PracticalSocket.cpp</key>
+		<key>../../../../../../../../Document/Classes/Spring 2011/CMU CUDA/Projects/Project7/CudaP7/Network/Sender/BroadcastSender.cpp</key>
 		<dict>
 			<key>caret</key>
 			<dict>
 				<key>column</key>
 				<integer>3</integer>
+				<key>line</key>
+				<integer>64</integer>
+			</dict>
+			<key>firstVisibleColumn</key>
+			<integer>0</integer>
+			<key>firstVisibleLine</key>
+			<integer>35</integer>
+		</dict>
+		<key>../../../../../../../../Document/Classes/Spring 2011/CMU CUDA/Projects/Project7/CudaP7/Network/Sender/Mesh.cpp</key>
+		<dict>
+			<key>caret</key>
+			<dict>
+				<key>column</key>
+				<integer>7</integer>
+				<key>line</key>
+				<integer>23</integer>
+			</dict>
+			<key>firstVisibleColumn</key>
+			<integer>0</integer>
+			<key>firstVisibleLine</key>
+			<integer>5</integer>
+		</dict>
+		<key>../../../../../../../../Document/Classes/Spring 2011/CMU CUDA/Projects/Project7/CudaP7/Network/Sender/Mesh.hh</key>
+		<dict>
+			<key>caret</key>
+			<dict>
+				<key>column</key>
+				<integer>9</integer>
+				<key>line</key>
+				<integer>27</integer>
+			</dict>
+			<key>firstVisibleColumn</key>
+			<integer>0</integer>
+			<key>firstVisibleLine</key>
+			<integer>0</integer>
+		</dict>
+		<key>../../../../../../../../Document/Classes/Spring 2011/CMU CUDA/Projects/Project7/CudaP7/Network/Sender/PracticalSocket.cpp</key>
+		<dict>
+			<key>caret</key>
+			<dict>
+				<key>column</key>
+				<integer>0</integer>
+				<key>line</key>
+				<integer>321</integer>
+			</dict>
+			<key>firstVisibleColumn</key>
+			<integer>0</integer>
+			<key>firstVisibleLine</key>
+			<integer>324</integer>
+		</dict>
+		<key>../../../../../../../../Document/Classes/Spring 2011/CMU CUDA/Projects/Project7/CudaP7/Network/Sender/PracticalSocket.h</key>
+		<dict>
+			<key>caret</key>
+			<dict>
+				<key>column</key>
+				<integer>0</integer>
+				<key>line</key>
+				<integer>0</integer>
+			</dict>
+			<key>firstVisibleColumn</key>
+			<integer>0</integer>
+			<key>firstVisibleLine</key>
+			<integer>283</integer>
+		</dict>
+		<key>../../../../../../../../Document/Classes/Spring 2011/CMU CUDA/Projects/Project7/CudaP7/Network/Sender/data.hh</key>
+		<dict>
+			<key>caret</key>
+			<dict>
+				<key>column</key>
+				<integer>2</integer>
 				<key>line</key>
 				<integer>17</integer>
 			</dict>
@@ -103,28 +173,17 @@
 			<key>firstVisibleLine</key>
 			<integer>0</integer>
 		</dict>
-		<key>../../../../../../../../Document/Classes/Spring 2011/CMU CUDA/Projects/Project7/CudaP7/Network/PracticalSocket.hpp</key>
-		<dict>
-			<key>caret</key>
-			<dict>
-				<key>column</key>
-				<integer>0</integer>
-				<key>line</key>
-				<integer>339</integer>
-			</dict>
-			<key>firstVisibleColumn</key>
-			<integer>0</integer>
-			<key>firstVisibleLine</key>
-			<integer>299</integer>
-		</dict>
 	</dict>
 	<key>openDocuments</key>
 	<array>
-		<string>../../../../../../../../Document/Classes/Spring 2011/CMU CUDA/Projects/Project7/CudaP7/Network/PracticalSocket.hpp</string>
-		<string>../../../../../../../../Document/Classes/Spring 2011/CMU CUDA/Projects/Project7/CudaP7/Network/PracticalSocket.cpp</string>
-		<string>../../../../../../../../Document/Classes/Spring 2011/CMU CUDA/Projects/Project7/CudaP7/Network/BroadcastSender.cpp</string>
-		<string>../../../../../../../../Document/Classes/Spring 2011/CMU CUDA/Projects/Project7/CudaP7/Network/BroadcastReceiver.cpp</string>
-		<string>../../../../../../../../Document/Classes/Spring 2011/CMU CUDA/Projects/Project7/CudaP7/Network/EchoServer.cpp</string>
+		<string>../../../../../../../../Document/Classes/Spring 2011/CMU CUDA/Projects/Project7/CudaP7/Network/Sender/BroadcastSender.cpp</string>
+		<string>../../../../../../../../Document/Classes/Spring 2011/CMU CUDA/Projects/Project7/CudaP7/Network/Sender/PracticalSocket.cpp</string>
+		<string>../../../../../../../../Document/Classes/Spring 2011/CMU CUDA/Projects/Project7/CudaP7/Network/Sender/PracticalSocket.h</string>
+		<string>../../../../../../../../Document/Classes/Spring 2011/CMU CUDA/Projects/Project7/CudaP7/Network/Receiver/BroadcastReceiver.cpp</string>
+		<string>../../../../../../../../Document/Classes/Spring 2011/CMU CUDA/Projects/Project7/CudaP7/Network/Sender/Mesh.hh</string>
+		<string>../../../../../../../../Document/Classes/Spring 2011/CMU CUDA/Projects/Project7/CudaP7/Network/Sender/Mesh.cpp</string>
+		<string>../../../../../../../../Document/Classes/Spring 2011/CMU CUDA/Projects/Project7/CudaP7/Network/Sender/data.hh</string>
+		<string>../../../../../../../../Document/Classes/Spring 2011/CMU CUDA/Projects/Project7/CudaP7/Network/Receiver/data.hh</string>
 	</array>
 	<key>showFileHierarchyDrawer</key>
 	<true/>

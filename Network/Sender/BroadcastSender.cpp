@@ -21,6 +21,7 @@
 #include <iostream>           // For cout and cerr
 #include <cstdlib>            // For atoi()
 #include <vector>
+#include <iostream>
 #include "Mesh.hh"
 
 using namespace std;
@@ -36,28 +37,33 @@ int main(int argc, char *argv[]) {
   unsigned short destPort = atoi(argv[2]);  // Second arg: destination port
   char* sendString = argv[3];               // Third arg:  string to broadcast
 
-std::vector<struct m_triangle> mesh;
+struct m_triangle temp[100];
 
-struct m_triangle temp;
-temp.vertices[0][0] = 1;
-temp.vertices[0][1] = 1;
-temp.vertices[0][2] = 1;
+for(int ii = 0; ii < 100; ii++){
+	temp[ii].vertices[0][0] = 1;
+	temp[ii].vertices[0][1] = 1;
+	temp[ii].vertices[0][2] = 1;
+}
 
-for(int ii = 0; ii < 100; ii++)
-	mesh.push_back(temp);
+//for(int ii = 0; ii < 50; ii++)
+//	mesh.push_back(temp);
+
+int num =  sizeof(struct m_triangle) * 100;
+
+std::cout << "size: " << num << std::endl;
 
   try {
     UDPSocket sock;
-  
-	int num = mesh.size() * sizeof(struct m_triangle);
-
+	
     // Repeatedly send the string (not including \0) to the server
     for (;;) {
 
 	  sock.sendTo(&num, 4, destAddress, destPort);
 
-// 	  sock.sendTo(&mesh, num, destAddress, destPort);
+ 	  sock.sendTo(&temp, num/2, destAddress, destPort);      
 
+	  sock.sendTo(&temp + (num/2)+1, (num/2)-1, destAddress, destPort);
+		
       sleep(3);
     }
   } catch (SocketException &e) {

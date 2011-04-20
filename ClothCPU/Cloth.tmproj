@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>currentDocument</key>
-	<string>window.cc</string>
+	<string>main.cc</string>
 	<key>documents</key>
 	<array>
 		<dict>
@@ -166,14 +166,14 @@
 			<key>caret</key>
 			<dict>
 				<key>column</key>
-				<integer>9</integer>
+				<integer>21</integer>
 				<key>line</key>
-				<integer>64</integer>
+				<integer>193</integer>
 			</dict>
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
-			<integer>39</integer>
+			<integer>171</integer>
 		</dict>
 		<key>makefile.osx</key>
 		<dict>
@@ -236,14 +236,14 @@
 			<key>caret</key>
 			<dict>
 				<key>column</key>
-				<integer>25</integer>
+				<integer>28</integer>
 				<key>line</key>
-				<integer>99</integer>
+				<integer>153</integer>
 			</dict>
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
-			<integer>88</integer>
+			<integer>122</integer>
 		</dict>
 		<key>window.hh</key>
 		<dict>
@@ -283,6 +283,6 @@
 	<key>showFileHierarchyDrawer</key>
 	<true/>
 	<key>windowFrame</key>
-	<string>{{530, 0}, {1149, 778}}</string>
+	<string>{{127, 0}, {1149, 778}}</string>
 </dict>
 </plist>

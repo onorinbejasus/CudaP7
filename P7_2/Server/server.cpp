@@ -28,7 +28,8 @@ public:
 
 	bool ret = m->loadModelData("Mesh/dragon.obj", &mesh_);
 	std::cout << "size: " << mesh_.size() << std::endl;;	
-    // Start an accept operation for a new connection.
+    
+	// Start an accept operation for a new connection.
     connection_ptr new_conn(new connection(acceptor_.io_service()));
     acceptor_.async_accept(new_conn->socket(),
         boost::bind(&server::handle_accept, this,

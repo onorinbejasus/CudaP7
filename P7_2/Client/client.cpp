@@ -113,6 +113,7 @@ public:
 			glVertex3fv(mesh_[i].vertices[2]);
 		
       	}
+		
 		glEnd();
 		
 		glEndList();
@@ -173,7 +174,6 @@ void display(void) {
               cos(cameraSight),
               sin(cameraViewAngle) * (-sin(cameraSight)));
 
-
     glColor3f(1.0, 0.0, 0.0);
   
     glCallList(display_list);
@@ -205,8 +205,6 @@ void reshape(int width, int height) {
 // ===================================
 // = GLUT and OpenGL setup functions =
 // ===================================
-
-
 
 /// The keyboard callback
 void keyboard(
@@ -274,8 +272,7 @@ void keyboard(
 			break;
 	}
 	
-	glutPostRedisplay();
-	
+	glutPostRedisplay();	
 }
 
 /// timer callback function
@@ -300,7 +297,6 @@ void motion(
 {
 	return;
 }
-
 
 // ========
 // = Main =

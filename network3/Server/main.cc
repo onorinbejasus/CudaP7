@@ -39,8 +39,8 @@ client_t clients[MAX_FD];
 
 int numCloths = 1;
 
-bool dsim = false;
-bool wind = false;
+bool dsim = true;
+bool wind = true;
 extern void step_func();
 extern float *get_dataPtr();
 extern uint *get_indexPtr();
@@ -50,12 +50,11 @@ extern int size;
 
 void handle_clients_line(int client){
 	
-	float data[size * 3] ;//= get_dataPtr();
-	step_func();
+	float *data = get_dataPtr();
 	
-	for(int ii = 0; ii < size * 3; ii++){
-		data[ii] = 66.0;
-	}
+	//for(int ii = 0; ii < size * 3; ii++){
+	//	data[ii] = 66.0;
+	//}
 	
 	send( clients[client].fd, (float*)data, sizeof(float) * size * 3, 0);	
 	
@@ -132,7 +131,7 @@ int main(int argc, char **argv) {
 								
 			num_clients++;
 		}
-		for(i=0; i<num_clients; i++){				
+		for(i=0; i<num_clients; i++){
 			
 			if(FD_ISSET(clients[i].fd, &fd_read)){
 				if((recv_length = recv(clients[i].fd, clients[i].inbuf, MAX_LINE+1, 0)) == 0){
@@ -147,6 +146,8 @@ int main(int argc, char **argv) {
 				}
 			}
 		}
+		
+		step_func();
 	}
 				
 	return 0;

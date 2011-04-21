@@ -92,10 +92,10 @@ void init_system(void)
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * size * 3, data_pointer, GL_DYNAMIC_DRAW);
 	
-	// for(int ii = 0; ii < size * 3; ii++)
-	// {
-	// 	printf("data: %f\n", data_pointer[ii]);
-	// }
+	for(int ii = 0; ii < size * 3; ii++)
+	{
+	 	printf("data: %f\n", data_pointer[ii]);
+	}
 }
 
 
@@ -106,7 +106,7 @@ void init_system(void)
 void draw_particles ( void )
 {
 	// Read from the socket
-	/*writeline(sock, &vbo, sizeof(GLuint));
+	writeline(sock, &vbo, sizeof(GLuint));
 	readline(sock, (float*)data_pointer, sizeof(float) * size * 3);
 	
 	// Map to VBO
@@ -127,5 +127,5 @@ void draw_particles ( void )
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 		
 		glDisableClientState(GL_VERTEX_ARRAY);
-	glPopMatrix(); */
+	glPopMatrix(); 
 }

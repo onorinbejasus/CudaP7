@@ -126,7 +126,12 @@ int setup_socket(int port){
 }
 
 ssize_t readline(int sockd, void *vptr, size_t maxlen) {
-    size_t n;
+	
+	read(sockd, vptr, maxlen);
+	
+	return maxlen;
+	
+    /*size_t n;
 	ssize_t rc;
     char    c, *buffer;
 
@@ -153,11 +158,16 @@ ssize_t readline(int sockd, void *vptr, size_t maxlen) {
     }
 
     *buffer = 0;
-    return n;
+    return n; */
 }
 
 ssize_t writeline(int sockd, const void *vptr, size_t n) {
-    size_t      nleft;
+	
+	write(sockd, vptr, n);
+	
+	return n;
+	
+    /*size_t      nleft;
     ssize_t     nwritten;
     const char *buffer;
 
@@ -175,5 +185,5 @@ ssize_t writeline(int sockd, const void *vptr, size_t n) {
 		buffer += nwritten;
     }
 
-    return n;
+    return n;*/
 }

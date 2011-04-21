@@ -364,22 +364,11 @@ void verlet_simulation_step(struct Particle* pVector, float4 *data_pointer, GLui
 	/* apply wind and gravity forces */	
 	add_force<<<nBlocks, threadsPerBlock>>>(pVector, gravity, wind, row, column);
 		
-	cudaThreadSynchronize();
-	
-	// remove old 
-	// deleteVBO(numCloth);
-	// data_pointer = 0;
-	
-	/* initialize VBO */
-	// createVBO(numCloth);
-	
 	/* map vbo in cuda */
 	cudaGLMapBufferObject((void**)&data_pointer, vbo);
 				
  	satisfy<<<nBlocks, threadsPerBlock>>>(pVector, data_pointer, row, column);
 
-	cudaThreadSynchronize();
-	
 	/* unmap vbo */
 	cudaGLUnmapBufferObject(vbo);
 				

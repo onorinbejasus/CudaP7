@@ -45,14 +45,13 @@ int height = 4;
 
 struct Particle* pVector;
 
-//GLuint texVbo;
-//GLuint indexVbo;
 unsigned int *flagIndexArray;
 float *data_pointer;
 float *gpuData_pointer;
 
-float2 *flagTexArray;
+float *flagTexArray;
 GLuint flagTexId;
+unsigned char *data;
 
 int size = row * column;
 
@@ -73,6 +72,14 @@ uint *get_indexPtr()
 	return flagIndexArray;
 }
 
+float *get_flagTexArray() {
+	return flagTexArray;
+}
+
+unsigned char *get_flagTexData() {
+	return data;
+}
+
 /*----------------------------------------------------------------------
 free/clear/allocate simulation data
 ----------------------------------------------------------------------*/
@@ -81,9 +88,7 @@ void free_data ( void )
 	cudaFree(pVector);
 	
 	free(data_pointer);
-//    glDeleteBuffers(1, &indexVbo);
-//    glDeleteBuffers(1, &texVbo);
-
+	free(data);
     free(flagIndexArray);
     free(flagTexArray);
 }
@@ -148,7 +153,8 @@ void make_flag_mesh( void )
     {
         int currX = column - ii%column;
         int currY = (ii/column)%row;
-        flagTexArray[ii] = make_float2((float)currX/colFloat, (float)(currY)/rowFloat);
+        flagTexArray[ii * 2 + 0] = (float)(currX)/colFloat;
+		flagTexArray[ii * 2 + 1] = (float)(currY)/rowFloat;
     }
 }
 
@@ -179,33 +185,12 @@ void init_system(void)
      * ***************************/
 
     flagIndexArray = (unsigned int*)malloc(sizeof(unsigned int) * numTriangles * 3);
-    flagTexArray = (float2*)malloc(sizeof(float2) * size);
+    flagTexArray = (float*)malloc(sizeof(float) * size * 2);
     make_flag_mesh();
-
-    // glGenBuffers(1, &indexVbo);
-    //    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexVbo);
-    //    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * numTriangles * 3, flagIndexArray, GL_STATIC_DRAW);
-    // 
-    //    glGenBuffers(1, &texVbo);
-    //    glBindBuffer(GL_ARRAY_BUFFER, texVbo);
-    //    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 2 * size, flagTexArray, GL_STATIC_DRAW);
 
     const char *flagTextureFilename = "Textures/american_flag.png";
     int w, h;
-    unsigned char *data = loadImageRGBA(flagTextureFilename, &w, &h);
-
-    // glGenTextures(1, &flagTexId);
-    //     glActiveTexture(GL_TEXTURE0_ARB);
-    //     glBindTexture(GL_TEXTURE_2D, flagTexId);
-    // 
-    //     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-    //     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-    //     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    //     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    // 
-    //     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-    
-    free(data);
+    data = loadImageRGBA(flagTextureFilename, &w, &h);
 }
 /*----------------------------------------------------------------------
 relates mouse movements to tinker toy construction

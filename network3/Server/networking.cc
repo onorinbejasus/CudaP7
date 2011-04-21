@@ -130,13 +130,15 @@ ssize_t readline(int sockd, void *vptr, size_t maxlen) {
 	read(sockd, vptr, maxlen);
 	
 	return maxlen;
-	
-    /*size_t n;
+}
+
+ssize_t readCharLine(int sockd, void *vptr, size_t maxlen) {
+    size_t n;
 	ssize_t rc;
     char    c, *buffer;
-
+	
     buffer = (char*)vptr;
-
+	
     for ( n = 1; n < maxlen; n++ ) {
 		
 		if ( (rc = read(sockd, &c, 1)) == 1 ) {
@@ -156,9 +158,9 @@ ssize_t readline(int sockd, void *vptr, size_t maxlen) {
 			return -1;
 		}
     }
-
+	
     *buffer = 0;
-    return n; */
+    return n; 
 }
 
 ssize_t writeline(int sockd, const void *vptr, size_t n) {
@@ -166,14 +168,21 @@ ssize_t writeline(int sockd, const void *vptr, size_t n) {
 	write(sockd, vptr, n);
 	
 	return n;
+}
+
+ssize_t writeCharLine(int sockd, const void *vptr, size_t n) {
 	
-    /*size_t      nleft;
+	write(sockd, vptr, n);
+	
+	return n;
+	
+    size_t      nleft;
     ssize_t     nwritten;
     const char *buffer;
-
+	
     buffer = (char*)vptr;
     nleft  = n;
-
+	
     while ( nleft > 0 ) {
 		if ( (nwritten = write(sockd, buffer, nleft)) <= 0 ) {
 			if ( errno == EINTR )
@@ -184,6 +193,6 @@ ssize_t writeline(int sockd, const void *vptr, size_t n) {
 		nleft  -= nwritten;
 		buffer += nwritten;
     }
-
-    return n;*/
+	
+    return n;
 }

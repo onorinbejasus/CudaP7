@@ -44,6 +44,9 @@ bool wind = true;
 extern void step_func();
 extern float *get_dataPtr();
 extern uint *get_indexPtr();
+extern float *get_flagTexArray();
+extern unsigned char *get_flagTexData();
+
 extern uint numTriangles;
 
 extern int size;
@@ -51,10 +54,6 @@ extern int size;
 void handle_clients_line(int client){
 	
 	float *data = get_dataPtr();
-	
-	//for(int ii = 0; ii < size * 3; ii++){
-	//	data[ii] = 66.0;
-	//}
 	
 	send( clients[client].fd, (float*)data, sizeof(float) * size * 3, 0);	
 	
@@ -120,14 +119,22 @@ int main(int argc, char **argv) {
 			clients[num_clients].fd = iter_fd;
 			printf("Client Connected on fd %d\n", iter_fd);
 	
+			// Send index array
 			uint *indices;
 			indices = get_indexPtr();
+			send( clients[num_clients].fd, (uint*)indices, sizeof(uint) * numTriangles * 3, 0);	
 			
-			for(int ii = 0; ii < numTriangles * 3; ii++){
-				std::cout << indices[ii] << std::endl;
-			 }
+			// Send texture data
+			/* const char *texData;
+			texData = (const char *)get_flagTexData();
+			int sizeOfData = sizeof(texData);
+			send( clients[num_clients].fd, &sizeOfData, sizeof(int), 0);
+			send( clients[num_clients].fd, (char*)texData, sizeOfData, 0); */
 			
-			send( clients[num_clients].fd, (uint*)indices, sizeof(uint) * numTriangles * 3, 0);		
+			// Send texture coordinates
+			float *texArray;
+			texArray = get_flagTexArray();
+			send( clients[num_clients].fd, (float*)texArray, sizeof(float) * size * 2, 0);
 								
 			num_clients++;
 		}

@@ -61,8 +61,7 @@ void set_nonblocking(int newclientfd){
 
 	if(fcntl(newclientfd, F_SETFL, opts) < 0){
 		printf("Error setting Options\n");
-	}
-	
+	}	
 }
 
 int setup_socket(int port){
@@ -92,7 +91,6 @@ int setup_socket(int port){
         return err;
 	}
 	
-
     /* Bind Socket */
     memset(&myaddr,'\0',sizeof((myaddr))); //zero myaddr                                    
     myaddr.sin_family = AF_INET;
@@ -110,7 +108,6 @@ int setup_socket(int port){
         printf("listen error\n");
         return err;
     }
-
 	
 	//convert int32 to dot format
 	unsigned int ip_num = gethostid();

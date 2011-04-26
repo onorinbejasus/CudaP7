@@ -55,8 +55,7 @@ void handle_clients_line(int client){
 	
 	float *data = get_dataPtr();
 	
-	send( clients[client].fd, (float*)data, sizeof(float) * size * 3, 0);	
-	
+	writeline( clients[client].fd, (float*)data, sizeof(float) * size * 3);	
 }
 
 int main(int argc, char **argv) {
@@ -122,7 +121,12 @@ int main(int argc, char **argv) {
 			// Send index array
 			uint *indices;
 			indices = get_indexPtr();
-			send( clients[num_clients].fd, (uint*)indices, sizeof(uint) * numTriangles * 3, 0);	
+			writeline( clients[num_clients].fd, (uint*)indices, sizeof(uint) * numTriangles * 3);	
+			
+			for(int ii = 0; ii < numTriangles * 3; ii++){
+				
+				printf("index: %u\n", indices[ii]);
+			}
 			
 			// Send texture data
 			/* const char *texData;
@@ -134,7 +138,7 @@ int main(int argc, char **argv) {
 			// Send texture coordinates
 			float *texArray;
 			texArray = get_flagTexArray();
-			send( clients[num_clients].fd, (float*)texArray, sizeof(float) * size * 2, 0);
+			writeline( clients[num_clients].fd, (float*)texArray, sizeof(float) * size * 2);
 								
 			num_clients++;
 		}

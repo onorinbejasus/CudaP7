@@ -44,18 +44,37 @@ int height = 4;
 
 struct Particle** pVector;
 
+// Lighting attributes
+GLfloat lightPos[] = {3.0, 5.0, -4.0, 0.0};
+GLfloat lightColor[] = {1.0, 1.0, 1.0, 1.0};
+GLfloat lightSpecular[] = {1.0, 1.0, 1.0, 1.0};
+GLfloat lightDiffuse[] = {1.0, 1.0, 1.0, 1.0};
+GLfloat lightShine[] = {20.0};
+
+// Vbos
 GLuint *vbo;
+GLuint *normVbo;
 GLuint texVbo;
 GLuint indexVbo;
+
+// Flag normals
+float3 **flagNormals;
+
+// Triangle indices
 unsigned int *flagIndexArray;
+
+// Flag positions
 float4 **data_pointer;
 
+// Flag texture coordinates
 float2 *flagTexArray;
+
+// Texture image id
 GLuint flagTexId;
 
 int size = row * column;
 
-extern void verlet_simulation_step(struct Particle* pVector, float4 *data_pointer, GLuint vbo, bool wind, int row, int column, int numCloth);
+extern void verlet_simulation_step(struct Particle* pVector, float4 *data_pointer, GLuint vbo, float3 *flagNorms, GLuint nVbo, bool wind, int row, int column, int numCloth);
 void deleteVBO(int numCloth);
 void deleteTexVBO();
 void deleteIndexVBO();
@@ -75,22 +94,24 @@ void free_data ( void )
     {
 	    cudaFree(pVector[ii]);
 	    deleteVBO(ii);
-	    data_pointer[ii] = 0;
+
+        free(flagNormals[ii]);
     }
-    data_pointer = 0;
+
+    free(flagNormals);
 
     glDeleteBuffers(1, &indexVbo);
     glDeleteBuffers(1, &texVbo);
 
     free(flagIndexArray);
-    free(flagTexArray);
+    free(flagTexArray); 
 }
 
 /*--------------------------------------------------------------------
 					Make Particles
 --------------------------------------------------------------------*/
 __global__
-void make_particles(struct Particle *pVector, float4 *data_pointer, int row, int column, int width, int height)
+void make_particles(struct Particle *pVector, float4 *data_pointer, float3 *flagNorms, int row, int column, int width, int height)
 {
 	// //calculate the unique thread index
 	int index = blockIdx.x * blockDim.x + threadIdx.x;
@@ -101,9 +122,9 @@ void make_particles(struct Particle *pVector, float4 *data_pointer, int row, int
 	float3 pos = make_float3(width * (i/(float)row), -height * (j/(float)column), 0);
 	
 	if((j == 0 && i == 0) || (i == 0 && j == column-1))
-		pVector[getParticleInd(i,j,row)] = Particle(pos, 1, data_pointer, getParticleInd(i,j, row), false);
+		pVector[getParticleInd(i,j,row)] = Particle(pos, 1, data_pointer, flagNorms, getParticleInd(i,j, row), false);
 	else
-		pVector[getParticleInd(i,j,row)] = Particle(pos, 1, data_pointer, getParticleInd(i,j, row), true);
+		pVector[getParticleInd(i,j,row)] = Particle(pos, 1, data_pointer, flagNorms, getParticleInd(i,j, row), true);
 	
 } // end make particles
 
@@ -133,7 +154,11 @@ void deleteVBO(int clothNum)
     glBindBuffer( 1, vbo[clothNum]);
     glDeleteBuffers( 1, &(vbo[clothNum]));
 
+    glBindBuffer( 1, normVbo[clothNum]);
+    glDeleteBuffers( 1, &(normVbo[clothNum]));
+
     cudaGLUnregisterBufferObject(vbo[clothNum]);
+    cudaGLUnregisterBufferObject(normVbo[clothNum]);
 }
 
 /*--------------------------------------------------------------------
@@ -190,8 +215,10 @@ void make_flag_mesh( void )
 void init_system(void)
 {		
     vbo = (GLuint*)malloc(sizeof(GLuint) * numCloths);
+    normVbo = (GLuint*)malloc(sizeof(GLuint) * numCloths);
     pVector = (Particle**)malloc(sizeof(Particle*) * numCloths);
     data_pointer = (float4**)malloc(sizeof(float4*) * numCloths);
+    flagNormals = (float3**)malloc(sizeof(float3*) * numCloths);
 
 	/* malloc cuda memory*/
     for(int ii = 0; ii < numCloths; ii++)
@@ -203,21 +230,28 @@ void init_system(void)
         glBindBuffer(GL_ARRAY_BUFFER, vbo[ii]);
         glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 4 * size, 0, GL_DYNAMIC_DRAW);
         cudaGLRegisterBufferObject(vbo[ii]);
-	
+
+        glGenBuffers(1, &(normVbo[ii]));
+        glBindBuffer(GL_ARRAY_BUFFER, normVbo[ii]);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 3 * size, 0, GL_DYNAMIC_DRAW);
+        cudaGLRegisterBufferObject(normVbo[ii]);
+
 	    /* map vbo in cuda */
 	    cudaGLMapBufferObject((void**)&(data_pointer[ii]), vbo[ii]);
+	    cudaGLMapBufferObject((void**)&(flagNormals[ii]), normVbo[ii]);
 	
 	    /* create and copy */
 	    int totalThreads = row * column;
 	    int nBlocks = totalThreads/threadsPerBlock;
 	    nBlocks += ((totalThreads % threadsPerBlock) > 0) ? 1 : 0;
 	
-	    make_particles<<<nBlocks, threadsPerBlock>>>(pVector[ii], data_pointer[ii], row, column, width, height); // create particles
+	    make_particles<<<nBlocks, threadsPerBlock>>>(pVector[ii], data_pointer[ii], flagNormals[ii], row, column, width, height); // create particles
 
         cudaThreadSynchronize();
 		
 	    /* unmap vbo */
 	    cudaGLUnmapBufferObject(vbo[ii]);
+	    cudaGLUnmapBufferObject(normVbo[ii]);
     }
 
     /******************************
@@ -253,6 +287,22 @@ void init_system(void)
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
 
     free(data);
+
+    /******************************
+     * Lighting
+     * ***************************/
+    
+    // Enable depth testing
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_NORMALIZE);
+
+    // Enable lighting
+    glEnable(GL_LIGHTING);
+    glEnable(GL_LIGHT0);
+
+    // Set the light position and color
+    glLightfv(GL_LIGHT0, GL_POSITION, lightPos);
+    glLightfv(GL_LIGHT0, GL_SPECULAR, lightColor);
 }
 
 
@@ -262,8 +312,13 @@ void init_system(void)
 
 void draw_particles ( void )
 {
+    glEnable(GL_LIGHTING);
     glEnable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, flagTexId);
+
+    glMaterialfv(GL_FRONT, GL_SPECULAR, lightSpecular);
+    glMaterialfv(GL_FRONT, GL_DIFFUSE, lightDiffuse);
+    glMaterialfv(GL_FRONT, GL_SHININESS, lightShine);
 
     for(int ii = 0; ii < numCloths; ii++)
     {
@@ -275,8 +330,11 @@ void draw_particles ( void )
             glVertexPointer(4, GL_FLOAT, 0, (GLvoid*)((char*)NULL));
             glBindBuffer(GL_ARRAY_BUFFER, texVbo);
             glTexCoordPointer(2, GL_FLOAT, 0, (GLvoid*)((char*)NULL));
+            glBindBuffer(GL_ARRAY_BUFFER, normVbo[ii]);
+            glNormalPointer(GL_FLOAT, 0, (GLvoid*)((char*)NULL));
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexVbo);
             glEnableClientState(GL_VERTEX_ARRAY);
+            glEnableClientState(GL_NORMAL_ARRAY);
             glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 
             // Render flag mesh
@@ -286,11 +344,13 @@ void draw_particles ( void )
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
             glDisableClientState(GL_VERTEX_ARRAY); 
+            glDisableClientState(GL_NORMAL_ARRAY);
             glDisableClientState(GL_TEXTURE_COORD_ARRAY);
         glPopMatrix(); 
     }
 
     glDisable(GL_TEXTURE_2D);
+    glDisable(GL_LIGHTING);
 }
 
 /*--------------------------------------------------------------------
@@ -303,13 +363,14 @@ void draw_forces ( void )
 relates mouse movements to tinker toy construction
 ----------------------------------------------------------------------*/
 __global__
-void remap_GUI(struct Particle *pVector, float4 *data_pointer)
+void remap_GUI(struct Particle *pVector, float4 *data_pointer, float3 *flagNorms)
 {	
 	// //calculate the unique thread index
 	int index = blockIdx.x * blockDim.x + threadIdx.x;
 		
 	pVector[index].reset();
 	data_pointer[index] = make_float4(pVector[index].m_ConstructPos, 1);
+    flagNorms[index] = make_float3(0.0f, 0.0f, -1.0f);
 }
 
 void step_func ( )
@@ -317,40 +378,24 @@ void step_func ( )
     for(int ii = 0; ii < numCloths; ii++)
     {
 	    if ( dsim ){ // simulate
-		    verlet_simulation_step(pVector[ii], data_pointer[ii], vbo[ii], wind, row, column, ii);
-            /* struct Particle *temp = (struct Particle*)malloc(sizeof(struct Particle) * size);
-            cudaMemcpy(temp, pVector[ii], size*sizeof(struct Particle), cudaMemcpyDeviceToHost);
-            for(int i = 0; i < size; i++)
-            {
-                printf("Location = (%f, %f, %f)\n", temp[i].m_Position.x, temp[i].m_Position.y, temp[i].m_Position.z);
-                int max = 9;
-                if(temp[i].m_Position.x > max || temp[i].m_Position.x < -max ||
-                   temp[i].m_Position.y > max || temp[i].m_Position.y < -max)
-                    exit(-1);
-            }*/
+		    verlet_simulation_step(pVector[ii], data_pointer[ii], vbo[ii], flagNormals[ii], normVbo[ii], wind, row, column, ii);
 	    }
 	    else { // remap
-		
-	        // remove old 
-		    deleteVBO(ii);
-		    data_pointer[ii] = 0;
-
-		    /* initialize VBO */
-		    createVBO(ii);
-
 		    /* map vbo in cuda */
 		    cudaGLMapBufferObject((void**)&(data_pointer[ii]), vbo[ii]);
+		    cudaGLMapBufferObject((void**)&(flagNormals[ii]), normVbo[ii]);
 		
 		    int totalThreads = row * column;
 		    int nBlocks = totalThreads/threadsPerBlock;
 		    nBlocks += ((totalThreads % threadsPerBlock) > 0) ? 1 : 0;
 		
-		    remap_GUI<<<nBlocks, threadsPerBlock>>>(pVector[ii], data_pointer[ii]);
+		    remap_GUI<<<nBlocks, threadsPerBlock>>>(pVector[ii], data_pointer[ii], flagNormals[ii]);
 
             cudaThreadSynchronize();
 		
 		    /* unmap vbo */
 		    cudaGLUnmapBufferObject(vbo[ii]);
+		    cudaGLUnmapBufferObject(normVbo[ii]);
 	    }
     }
 }

@@ -37,6 +37,17 @@ int getParticle(int x, int y, int row){ return y*row+x; }
 __device__
 float3 triangle_normal(float3 v1, float3 v2, float3 v3){ return ( cross(v2-v1, v3-v1) ); }
 
+__device__
+float3 triangle_normal(float4 v1, float4 v2, float4 v3)
+{ 
+    float3 myV1 = make_float3(v1.x, v1.y, v1.z);
+    float3 myV2 = make_float3(v2.x, v2.y, v2.z);
+    float3 myV3 = make_float3(v3.x, v3.y, v3.z);
+
+    return (cross(myV3-myV1, myV2-myV1)); 
+}
+
+
 /* apply the wind force to the cloth */
 
 __device__
@@ -354,7 +365,82 @@ void satisfy(struct Particle *pVector, float4 *data_pointer, int row, int column
 	}
 }
 
-void verlet_simulation_step(struct Particle* pVector, float4 *data_pointer, GLuint vbo, bool wind, int row, int column, int numCloth){
+__global__
+void calculate_flag_normals(float4 *data_pointer, float3 *flagNorms, int row, int column)
+{
+	// calculate the unique thread index
+	int index = blockIdx.x * blockDim.x + threadIdx.x;
+	
+	int x = index%row;
+	int y = index/column;
+
+    float3 currNorm = make_float3(0.0f, 0.0f, 0.0f);
+
+    if(x == 0 && y == 0)
+    {
+        // Top Left
+        currNorm += triangle_normal(data_pointer[index], data_pointer[index+column], data_pointer[index+1]);
+    }
+    else if(x == (column-1) && y == 0)
+    {
+        // Top Right
+        currNorm += triangle_normal(data_pointer[index], data_pointer[index-1], data_pointer[index+column-1]);
+        currNorm += triangle_normal(data_pointer[index], data_pointer[index+column-1], data_pointer[index+column]);
+    }
+    else if(x == 0 && y == (column-1))
+    {
+        // Bottom Left
+        currNorm += triangle_normal(data_pointer[index], data_pointer[index-column+1], data_pointer[index-column]);
+        currNorm += triangle_normal(data_pointer[index], data_pointer[index+1], data_pointer[index-column+1]);
+    }
+    else if(x == (row-1) && y == (column-1))
+    {
+        // Bottom Right
+        currNorm += triangle_normal(data_pointer[index], data_pointer[index-column], data_pointer[index-1]);
+    }
+    else if(y == 0)
+    {
+        // Top row
+        currNorm += triangle_normal(data_pointer[index], data_pointer[index-1], data_pointer[index+column-1]);
+        currNorm += triangle_normal(data_pointer[index], data_pointer[index+column-1], data_pointer[index+column]);
+        currNorm += triangle_normal(data_pointer[index], data_pointer[index+column], data_pointer[index+1]);
+    }
+    else if(y == (column-1))
+    {
+        // Bottom row
+        currNorm += triangle_normal(data_pointer[index], data_pointer[index-column], data_pointer[index-1]);
+        currNorm += triangle_normal(data_pointer[index], data_pointer[index-column+1], data_pointer[index-column]);
+        currNorm += triangle_normal(data_pointer[index], data_pointer[index+1], data_pointer[index-column+1]);
+    }
+    else if(x == 0)
+    {
+        // Left column
+        currNorm += triangle_normal(data_pointer[index], data_pointer[index-column+1], data_pointer[index-column]);
+        currNorm += triangle_normal(data_pointer[index], data_pointer[index+1], data_pointer[index-column+1]);
+        currNorm += triangle_normal(data_pointer[index], data_pointer[index+column], data_pointer[index+1]);
+    }
+    else if(x == (row-1))
+    {
+        // Right column 
+        currNorm += triangle_normal(data_pointer[index], data_pointer[index-column], data_pointer[index-1]);
+        currNorm += triangle_normal(data_pointer[index], data_pointer[index-1], data_pointer[index+column-1]);
+        currNorm += triangle_normal(data_pointer[index], data_pointer[index+column-1], data_pointer[index+column]);
+    }
+    else
+    {
+        // Middle vertex that touches six faces
+        currNorm += triangle_normal(data_pointer[index], data_pointer[index-1], data_pointer[index+column-1]);
+        currNorm += triangle_normal(data_pointer[index], data_pointer[index+column-1], data_pointer[index+column]);
+        currNorm += triangle_normal(data_pointer[index], data_pointer[index+column], data_pointer[index+1]);
+        currNorm += triangle_normal(data_pointer[index], data_pointer[index-column], data_pointer[index-1]);
+        currNorm += triangle_normal(data_pointer[index], data_pointer[index-column+1], data_pointer[index-column]);
+        currNorm += triangle_normal(data_pointer[index], data_pointer[index+1], data_pointer[index-column+1]);
+    }
+
+    flagNorms[index] = normalize(currNorm);
+}
+
+void verlet_simulation_step(struct Particle* pVector, float4 *data_pointer, GLuint vbo, float3 *flagNorms, GLuint nVbo, bool wind, int row, int column, int numCloth){
 				
 	/* set up number of threads to run */	
 	int totalThreads = row * column;
@@ -371,5 +457,11 @@ void verlet_simulation_step(struct Particle* pVector, float4 *data_pointer, GLui
 
 	/* unmap vbo */
 	cudaGLUnmapBufferObject(vbo);
+
+    cudaGLMapBufferObject((void**)&flagNorms, nVbo);
+
+    calculate_flag_normals<<<nBlocks, threadsPerBlock>>>(data_pointer, flagNorms, row, column);
+
+    cudaGLUnmapBufferObject(nVbo);
 				
 } // end sim step

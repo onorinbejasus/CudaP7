@@ -51,6 +51,12 @@ float4 **data_pointer;
 float2 *flagTexArray;
 GLuint flagTexId;
 
+float *flagNormalArray;
+GLuint normVbo;
+
+GLfloat lightPos[] = {0.0, 10.0, -10.0, 0.0};
+GLfloat lightColor[] = {1.0, 1.0, 1.0, 1.0};
+
 int size = row * column;
 
 extern void verlet_simulation_step(struct Particle* pVector, std::vector<Constraint*> constraints, 
@@ -276,6 +282,18 @@ void init_system(void)
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
 
     free(data);
+	
+	/******************************
+	 * Lighting stuff
+	 ******************************/
+	 
+	 // Enable lighting
+	 glEnable(GL_LIGHTING);
+	 glEnable(GL_LIGHT0);
+	 
+	 // Set light position
+	 glLightfv(GL_LIGHT0, GL_POSITION, lightPos);
+	 glLightfv(GL_LIGHT0, GL_SPECULAR, lightColor);
 }
 
 

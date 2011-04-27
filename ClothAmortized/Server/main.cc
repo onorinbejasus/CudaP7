@@ -139,6 +139,11 @@ int main(int argc, char **argv) {
 			float *texArray;
 			texArray = get_flagTexArray();
 			writeline( clients[num_clients].fd, (float*)texArray, sizeof(float) * size * 2);
+			
+			/*for(int ii = 0; ii < size * 2; ii++){
+				
+				printf("index: %f\n", texArray[ii]);
+			}*/
 								
 			num_clients++;
 		}

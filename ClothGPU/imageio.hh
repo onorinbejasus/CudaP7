@@ -1,15 +1,15 @@
 /* LIBRARY:   ImageIO Library v0.13
- * 
+ *
  * FILE:      imageio.h
  *
  * COPYRIGHT: Copyright (c) 2003-2004 Adrien Treuille
- * 
+ *
  * AUTHORS:   Adrien Treuille (treuille [AT] cs [DOT] washington [DOT] edu)
  *
  * LICENSE:   The ImageIO Library is supplied "AS IS".  The Authors
  *            disclaim all warranties, expressed or implied,
  *            including, without limitation, the warranties of
- *            merchantability and of fitness for any purpose. 
+ *            merchantability and of fitness for any purpose.
  *            The Authors assume no liability for direct, indirect,
  *            incidental, special, exemplary, or consequential
  *            damages, which may result from the use of the ImageIO
@@ -27,9 +27,14 @@
 #define IMAGE_IO_H
 
 #include <stdlib.h>
-// #include <tiffio.h>
+
+#ifdef __APPLE__
 #include </usr/X11/include/png.h>
 
+#else
+#include <png.h>
+
+#endif
 //
 // COMPILATION
 //
@@ -39,7 +44,7 @@
 // a const char * buffer loading up the values in row-major, RGBA format.
 // The memory associated with the buffer can be deallocated with free().
 // If there was an error reading file, then 0 is returned, and
-// width = height = -1. 
+// width = height = -1.
 unsigned char * loadImageRGBA(const char * fileName, int *width, int *height);
 
 // Saves image given by buffer with specicified with and height

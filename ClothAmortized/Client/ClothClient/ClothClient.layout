@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_layout_file>
+	<ActiveTarget name="Debug" />
+	<File name="../imageio.hh" open="1" top="1" tabpos="4">
+		<Cursor position="1181" topLine="13" />
+	</File>
+	<File name="../main.cc" open="1" top="0" tabpos="3">
+		<Cursor position="4410" topLine="182" />
+	</File>
+	<File name="../setup.cu" open="1" top="0" tabpos="1">
+		<Cursor position="0" topLine="139" />
+	</File>
+	<File name="../window.cc" open="1" top="0" tabpos="2">
+		<Cursor position="0" topLine="90" />
+	</File>
+</CodeBlocks_layout_file>

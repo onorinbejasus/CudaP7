@@ -52,14 +52,14 @@ extern uint numTriangles;
 extern int size;
 
 void handle_clients_line(int client){
-	
+
 	float *data = get_dataPtr();
-	
-	writeline( clients[client].fd, (float*)data, sizeof(float) * size * 3);	
+
+	writeline( clients[client].fd, (float*)data, sizeof(float) * size * 3);
 }
 
 int main(int argc, char **argv) {
-   
+
 	if(argc < 2){
 		printf("Usage: ./main <port number>\n");
 		exit(-1);
@@ -74,7 +74,7 @@ int main(int argc, char **argv) {
 	int num_clients = 0;
 
 	int port = atoi(argv[1]);
-	int server_fd = setup_socket(port);	
+	int server_fd = setup_socket(port);
 	if(server_fd < 0){
 		printf("Error Setting Up Server Socket, Exiting\n");
 		exit(EXIT_FAILURE);
@@ -89,14 +89,15 @@ int main(int argc, char **argv) {
 
 	//add server
 	FD_SET(server_fd, &fd_all);
-	
-	initCuda(argc, argv);	
+
 	initGL(argc, argv);
+	initCuda(argc, argv);
+
 
 	while(1){
-				
+
 		fd_read = fd_all;
-	
+
 		if(select(MAX_FD+1, &fd_read, NULL, NULL,  NULL) == 0){
 			//no jobs needed
 			continue;
@@ -105,67 +106,57 @@ int main(int argc, char **argv) {
 			//new connection request
 			printf("New client found, attempting connect...\n");
 			iter_fd = accept(server_fd, (struct sockaddr*)&clientaddr, &clen);
-	
+
 			if(iter_fd < 0){
 				printf("Error connecting to client, rejecting...\n");
 				continue;
 			}
 			printf("Connection Accepted\n");
-	
+
 			set_nonblocking(iter_fd);
 			FD_SET(iter_fd, &fd_all);
-	
+
 			clients[num_clients].fd = iter_fd;
 			printf("Client Connected on fd %d\n", iter_fd);
-	
+
 			// Send index array
 			uint *indices;
 			indices = get_indexPtr();
-			writeline( clients[num_clients].fd, (uint*)indices, sizeof(uint) * numTriangles * 3);	
-			
-			for(int ii = 0; ii < numTriangles * 3; ii++){
-				
-				printf("index: %u\n", indices[ii]);
-			}
-			
+			writeline( clients[num_clients].fd, (uint*)indices, sizeof(uint) * numTriangles * 3);
+
 			// Send texture data
 			/* const char *texData;
 			texData = (const char *)get_flagTexData();
 			int sizeOfData = sizeof(texData);
 			send( clients[num_clients].fd, &sizeOfData, sizeof(int), 0);
 			send( clients[num_clients].fd, (char*)texData, sizeOfData, 0); */
-			
+
 			// Send texture coordinates
 			float *texArray;
 			texArray = get_flagTexArray();
 			writeline( clients[num_clients].fd, (float*)texArray, sizeof(float) * size * 2);
-			
-			/*for(int ii = 0; ii < size * 2; ii++){
-				
-				printf("index: %f\n", texArray[ii]);
-			}*/
-								
+
 			num_clients++;
 		}
 		for(i=0; i<num_clients; i++){
-			
+
 			if(FD_ISSET(clients[i].fd, &fd_read)){
 				if((recv_length = recv(clients[i].fd, clients[i].inbuf, MAX_LINE+1, 0)) == 0){
 					close(clients[i].fd);
 					FD_CLR(clients[i].fd, &fd_all);
 					memset(&clients[i], '\0', sizeof(client_t));
 					printf("Client Removed\n");
-				
+
 				}else{
 					handle_clients_line(i);
-				
+
 				}
 			}
 		}
-		
+
 		step_func();
 	}
-				
+
 	return 0;
 }
 

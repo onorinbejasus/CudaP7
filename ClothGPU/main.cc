@@ -56,17 +56,17 @@ void display()
               cos(cameraViewAngle) * (-sin(cameraSight)),
               cos(cameraSight),
               sin(cameraViewAngle) * (-sin(cameraSight)));
-	
+
 
 	step_func();
-		
+
     glPushMatrix();
     glTranslatef(-2.0f, 3.0f, -13.0f);
 	draw_particles();
     glPopMatrix();
 
 	glutSwapBuffers ();
-	
+
 	glutPostRedisplay();
 }
 
@@ -152,7 +152,7 @@ void keyboard(
 			cudaThreadExit();
 			exit(0);
 			break;
-	
+
 		default:
 			break;
 	}
@@ -172,7 +172,7 @@ void mouse(
 	int state,	///< up or down
 	int x,		///< x position
 	int y)		///< y position
-{	
+{
 	return;
 }
 

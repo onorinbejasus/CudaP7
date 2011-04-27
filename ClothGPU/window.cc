@@ -33,13 +33,13 @@ GLuint shader = 0;
 /* compile the vertex and fragment shader */
 
 GLuint compileShader(const char *vsource, const char *fsource){
-	
+
 	GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
     GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
 
     glShaderSource(vertexShader, 1, &vsource, 0);
     glShaderSource(fragmentShader, 1, &fsource, 0);
-    
+
     glCompileShader(vertexShader);
     glCompileShader(fragmentShader);
 
@@ -62,7 +62,7 @@ GLuint compileShader(const char *vsource, const char *fsource){
         program = 0;
     }
 
-    return program;	
+    return program;
 }
 
 
@@ -75,7 +75,7 @@ CUTBoolean initGL(int argc, char** argv);
 // specified CUDA device, otherwise use device with highest Gflops/s
 void initCuda(int argc, char** argv)
 {
-	
+
 	if( cutCheckCmdLineFlag(argc, (const char**)argv, "device") ) {
 		cutilGLDeviceInit(argc, argv);
 	} else {
@@ -93,25 +93,25 @@ void computeFPS()
 	  int fpsLimit=100;
 
 	fpsCount++;
-	
+
 	if (fpsCount == fpsLimit) {
 		char fps[256];
 		float ifps = 1.f / (cutGetAverageTimerValue(timer) / 1000.f);
-		sprintf(fps, "GPU CLOTH", ifps);	
-		
+		sprintf(fps, "GPU CLOTH", ifps);
+
 		glutSetWindowTitle(fps);
-		fpsCount = 0; 
-		
-		cutilCheckError(cutResetTimer(timer));	
+		fpsCount = 0;
+
+		cutilCheckError(cutResetTimer(timer));
 	}
 }
 
 void fpsDisplay()
 {
-	cutilCheckError(cutStartTimer(timer));	
-	
+	cutilCheckError(cutStartTimer(timer));
+
 	display();
-	
+
 	cutilCheckError(cutStopTimer(timer));
 	computeFPS();
 }
@@ -120,7 +120,7 @@ CUTBoolean createWindow(int argc, char ** argv)
 {
 	// Create the CUTIL timer
 	cutilCheckError( cutCreateTimer( &timer));
-	
+
 	if (CUTFalse == initGL(argc, argv)) {
 		return CUTFalse;
 	}
@@ -139,7 +139,7 @@ void startApplication(int argc, char ** argv)
 {
 	// start rendering mainloop
 	glutMainLoop();
-	
+
 	// clean up
 	cudaThreadExit();
 	cutilExit(argc, argv);
@@ -155,14 +155,14 @@ CUTBoolean initGL(int argc, char **argv)
 	glutDisplayFunc(fpsDisplay);
 	glutKeyboardFunc(keyboard);
 	glutMotionFunc(motion);
-	
+
 	// check for necessary OpenGL extensions
 	glewInit();
 	if (! glewIsSupported( "GL_VERSION_2_0 " ) ) {
 		fprintf(stderr, "ERROR: Support for necessary OpenGL extensions missing.\n");
 		return CUTFalse;
 	}
-	
+
 	// Step 3: Setup our viewport and viewing modes
 	glutInitDisplayMode ( GLUT_RGBA | GLUT_DOUBLE );
 
@@ -173,9 +173,9 @@ CUTBoolean initGL(int argc, char **argv)
 	gluPerspective(20, 1.0, 0.1, 100.0);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity() ;  // init modelview to identity
-	
+
 	shader = compileShader(vertexShader, spherePixelShader);
 	init_system();
-	
+
 	return CUTTrue;
 }

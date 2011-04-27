@@ -23,12 +23,14 @@ unsigned int timer = 0; // a timer for FPS calculations
 // specified CUDA device, otherwise use device with highest Gflops/s
 void initCuda(int argc, char** argv)
 {
-	
+
 	if( cutCheckCmdLineFlag(argc, (const char**)argv, "device") ) {
 		cutilGLDeviceInit(argc, argv);
 	} else {
 		cudaGLSetGLDevice( cutGetMaxGflopsDeviceId() );
 	}
+
+    init_system();
 
 	// Clean up on program exit
 //	atexit(free_data);
@@ -41,33 +43,35 @@ void computeFPS()
 	  int fpsLimit=100;
 
 	fpsCount++;
-	
+
 	if (fpsCount == fpsLimit) {
 		char fps[256];
 		float ifps = 1.f / (cutGetAverageTimerValue(timer) / 1000.f);
-		sprintf(fps, "151-668 Project 7", ifps);	
-		
+		sprintf(fps, "151-668 Project 7", ifps);
+
 		glutSetWindowTitle(fps);
-		fpsCount = 0; 
-		
-		cutilCheckError(cutResetTimer(timer));	
+		fpsCount = 0;
+
+		cutilCheckError(cutResetTimer(timer));
 	}
 }
 
 bool initGL(int argc, char **argv)
 {
 	//Steps 1-2: create a window and GL context (also register callbacks)
-//	glutInit(&argc, argv);
-//	glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE);
-	// 
+	glutInit(&argc, argv);
+    glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE);
+	glutInitWindowSize(512, 512);
+	glutCreateWindow("GPU");
+	//
 	// // check for necessary OpenGL extensions
-	// glewInit();
-	// if (! glewIsSupported( "GL_VERSION_2_0 " ) ) {
-	// 	fprintf(stderr, "ERROR: Support for necessary OpenGL extensions missing.\n");
-	// 	return false;
-	// }
-	// 
-	init_system();
-	
+	 glewInit();
+	 if (! glewIsSupported( "GL_VERSION_2_0 " ) ) {
+	 	fprintf(stderr, "ERROR: Support for necessary OpenGL extensions missing.\n");
+	 	return false;
+	 }
+
+
+
 	return true;
 }

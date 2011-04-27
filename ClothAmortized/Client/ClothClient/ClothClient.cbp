@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="ClothClient" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="Debug">
+				<Option output="bin/Debug/ClothClient" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Debug/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-g" />
+				</Compiler>
+			</Target>
+			<Target title="Release">
+				<Option output="bin/Release/ClothClient" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Release/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-O2" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+				</Linker>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-Wall" />
+		</Compiler>
+		<Unit filename="../cuda_err.cu" />
+		<Unit filename="../cuda_err.hh" />
+		<Unit filename="../cuda_helpers.hh" />
+		<Unit filename="../data.txt" />
+		<Unit filename="../imageio.cc" />
+		<Unit filename="../imageio.hh" />
+		<Unit filename="../main.cc" />
+		<Unit filename="../makefile" />
+		<Unit filename="../makefile.ghc" />
+		<Unit filename="../makefile.nix" />
+		<Unit filename="../makefile.osx" />
+		<Unit filename="../networking.cc" />
+		<Unit filename="../networking.hh" />
+		<Unit filename="../open_gl.hh" />
+		<Unit filename="../setup.cu" />
+		<Unit filename="../setup.hh" />
+		<Unit filename="../window.cc" />
+		<Unit filename="../window.hh" />
+		<Extensions>
+			<code_completion />
+			<debugger />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>

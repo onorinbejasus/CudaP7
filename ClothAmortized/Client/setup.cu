@@ -7,6 +7,8 @@
 //  Copyright 2011 __MyCompanyName__. All rights reserved.
 // 
 
+#include "open_gl.hh"
+
 #include "imageio.hh"
 #include "networking.hh"
 

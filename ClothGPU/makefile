@@ -18,14 +18,14 @@ endif
 endif
 
 # this is what we're building
-all: main
+all: client
 
 # dependency handling
 .DELETE_ON_ERROR:
 -include $(OBJECTS:.o=.d)
 
 # the principal target
-main: $(OBJECTS) makefile
+client: $(OBJECTS) makefile
 	echo objects $(OBJECTS)
 	echo cu_objects $(CU_OBJECTS)
 	echo cc_objects $(CC_OBJECTS)

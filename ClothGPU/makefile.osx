@@ -1,5 +1,5 @@
 # generic compiler flags
-CFLAGS = -O3
+CFLAGS = -O3 -g
 LFLAGS = -framework OpenGL -framework GLUT /usr/X11/lib/libpng.3.dylib
 
 # NVCC flags

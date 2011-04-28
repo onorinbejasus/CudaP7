@@ -7,11 +7,9 @@
 //  Copyright 2011 __MyCompanyName__. All rights reserved.
 // 
 
-#include "open_gl.hh"
-
 #include "imageio.hh"
 #include "networking.hh"
-
+#include <iostream>
 #include "setup.hh"
 
 #include <cutil.h>
@@ -82,14 +80,16 @@ void init_system(void)
     flagIndexArray = (uint*)malloc(sizeof(uint) * numTriangles * 3);
 	readline(sock, (uint*)flagIndexArray, sizeof(uint) * numTriangles * 3);
 
-    glGenBuffers(1, &indexVbo);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexVbo);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * numTriangles * 3, flagIndexArray, GL_STATIC_DRAW);
-	
+	printf("numTriangles %u\n", numTriangles);
+
 	for(int ii = 0; ii < numTriangles * 3; ii++)
 	{
 		printf("index: %u\n", flagIndexArray[ii]);
 	}
+
+    glGenBuffers(1, &indexVbo);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexVbo);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * numTriangles * 3, flagIndexArray, GL_STATIC_DRAW);
 	
 	// Actual texture data 
 	const char *flagTextureFilename = "Textures/american_flag.png";
@@ -131,9 +131,20 @@ void init_system(void)
 void draw_particles ( void )
 {
 	// Read from the socket
-	writeline(sock, &vbo, sizeof(GLuint));
-	readline(sock, (float*)data_pointer, sizeof(float) * size * 3);
+
+	memset(data_pointer, 0 ,sizeof(float) * size * 3);	
 	
+	int n = 0;
+
+	writeline(sock, &vbo, sizeof(GLuint));
+
+	n = readline(sock, (float*)data_pointer, sizeof(float) * size * 3);
+
+	while(n < (sizeof(float) * size * 3)){
+		n += readline(sock, (char*)data_pointer + n, (sizeof(float) * size * 3) - n);
+
+	}	
+
 	// Map to VBO
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * size * 3, data_pointer, GL_DYNAMIC_DRAW);

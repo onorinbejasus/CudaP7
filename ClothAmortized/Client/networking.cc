@@ -127,7 +127,7 @@ int setup_socket(int port){
 
 ssize_t readline(int sockd, void *vptr, size_t maxlen) {
 	
-	read(sockd, vptr, maxlen);
+	maxlen = read(sockd, vptr, maxlen);
 	
 	return maxlen;
 }

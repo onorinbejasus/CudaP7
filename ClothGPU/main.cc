@@ -57,7 +57,7 @@ void display()
               cos(cameraSight),
               sin(cameraViewAngle) * (-sin(cameraSight)));
 
-
+	// step forward in time
 	step_func();
 
     glPushMatrix();
@@ -65,8 +65,10 @@ void display()
 	draw_particles();
     glPopMatrix();
 
+	// swap the back buffer
 	glutSwapBuffers ();
 
+	// recall display
 	glutPostRedisplay();
 }
 
@@ -148,7 +150,7 @@ void keyboard(
             posY += 4.0/cameraSensitivity;
             break;
 		case 27:
-			free_data();
+//			free_data();
 			cudaThreadExit();
 			exit(0);
 			break;

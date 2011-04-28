@@ -201,10 +201,7 @@ void make_flag_mesh( void )
         int currX = column - ii%column;
         int currY = (ii/column)%row;
         flagTexArray[ii] = make_float2((float)currX/colFloat, (float)(currY)/rowFloat);
-        printf("texCoord = (%f, %f)\n", flagTexArray[ii].x, flagTexArray[ii].y);
     }
-
-    printf("currIndex = %i\n", currIndex);
 }
 
 
@@ -305,7 +302,6 @@ void init_system(void)
     glLightfv(GL_LIGHT0, GL_SPECULAR, lightColor);
 }
 
-
 /*--------------------------------------------------------------------
 					Draw Particles
 --------------------------------------------------------------------*/
@@ -320,6 +316,7 @@ void draw_particles ( void )
     glMaterialfv(GL_FRONT, GL_DIFFUSE, lightDiffuse);
     glMaterialfv(GL_FRONT, GL_SHININESS, lightShine);
 
+	// iterate over the cloth particles and draw their corresponding mesh
     for(int ii = 0; ii < numCloths; ii++)
     {
         glPushMatrix();
@@ -353,28 +350,27 @@ void draw_particles ( void )
     glDisable(GL_LIGHTING);
 }
 
-/*--------------------------------------------------------------------
-					Draw Foreces
---------------------------------------------------------------------*/
-void draw_forces ( void )
-{}
-
 /*----------------------------------------------------------------------
 relates mouse movements to tinker toy construction
 ----------------------------------------------------------------------*/
 __global__
 void remap_GUI(struct Particle *pVector, float4 *data_pointer, float3 *flagNorms)
 {	
-	// //calculate the unique thread index
+	//calculate the unique thread index
 	int index = blockIdx.x * blockDim.x + threadIdx.x;
-		
+	
+	// reset particles	
 	pVector[index].reset();
+
+	// reset vbo and texture normals
 	data_pointer[index] = make_float4(pVector[index].m_ConstructPos, 1);
     flagNorms[index] = make_float3(0.0f, 0.0f, -1.0f);
 }
 
 void step_func ( )
 {
+	// iterate of the number of cloth
+	
     for(int ii = 0; ii < numCloths; ii++)
     {
 	    if ( dsim ){ // simulate
@@ -389,6 +385,7 @@ void step_func ( )
 		    int nBlocks = totalThreads/threadsPerBlock;
 		    nBlocks += ((totalThreads % threadsPerBlock) > 0) ? 1 : 0;
 		
+			// launch kernel to remap
 		    remap_GUI<<<nBlocks, threadsPerBlock>>>(pVector[ii], data_pointer[ii], flagNormals[ii]);
 
             cudaThreadSynchronize();

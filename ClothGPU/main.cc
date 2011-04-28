@@ -150,7 +150,7 @@ void keyboard(
             posY += 4.0/cameraSensitivity;
             break;
 		case 27:
-			free_data();
+//			free_data();
 			cudaThreadExit();
 			exit(0);
 			break;

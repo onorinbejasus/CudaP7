@@ -140,6 +140,8 @@ int main(int argc, char **argv) {
 		}
 		for(i=0; i<num_clients; i++){
 
+			printf("client: %i\n", clients[i].fd);
+
 			if(FD_ISSET(clients[i].fd, &fd_read)){
 				if((recv_length = recv(clients[i].fd, clients[i].inbuf, MAX_LINE+1, 0)) == 0){
 					close(clients[i].fd);

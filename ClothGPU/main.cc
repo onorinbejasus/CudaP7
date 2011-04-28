@@ -57,7 +57,7 @@ void display()
               cos(cameraSight),
               sin(cameraViewAngle) * (-sin(cameraSight)));
 
-
+	// step forward in time
 	step_func();
 
     glPushMatrix();
@@ -65,8 +65,10 @@ void display()
 	draw_particles();
     glPopMatrix();
 
+	// swap the back buffer
 	glutSwapBuffers ();
 
+	// recall display
 	glutPostRedisplay();
 }
 

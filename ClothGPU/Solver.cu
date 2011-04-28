@@ -29,11 +29,11 @@ extern void deleteVBO(int numCloth);
 const float3 gravity = make_float3(0.0f, -0.15f, 0.0f);
 static const int threadsPerBlock = 64;
 
+// get the index of the specified particle
 __device__ __host__
 int getParticle(int x, int y, int row){ return y*row+x; }
 
 /* find the normal of a triangle */
-
 __device__
 float3 triangle_normal(float3 v1, float3 v2, float3 v3){ return ( cross(v2-v1, v3-v1) ); }
 
@@ -53,12 +53,15 @@ float3 triangle_normal(float4 v1, float4 v2, float4 v3)
 __device__
 float3 windForce(struct Particle *pVector, float3 windDir, int x, int y, int row)
 {
+	// find the normal
 	float3 normal = triangle_normal(pVector[getParticle(x+1,y,row)].m_Position, 
 		pVector[getParticle(x,y,row)].m_Position, pVector[getParticle(x,y+1,row)].m_Position);
 	
 	float3 d = normalize(normal);
+	// apply force
 	float3 force = normal * dot(d,windDir);
 	
+	// rince and repeat
 	normal = triangle_normal(pVector[getParticle(x+1,y+1,row)].m_Position, 
 	pVector[getParticle(x+1,y,row)].m_Position, pVector[getParticle(x,y+1,row)].m_Position);
 
@@ -77,6 +80,7 @@ void add_force(struct Particle *pVector, float3 gravity, bool wind, int row, int
 	int x = index%row;
 	int y = index/column;
 
+	// step forward in time
 	pVector[index].step(TIME_STEP);
 	
 	/* gravity */
@@ -100,6 +104,7 @@ void satisfy(struct Particle *pVector, float4 *data_pointer, int row, int column
 	int ii = index%row;
 	int jj = index/column;
 
+	// iterate satisfy constraints numerous times
 	for(int i = 0; i < CONSTRAINT_ITERATIONS; i++){		
 		
 		if(ii < row-1){ // to the right
@@ -373,7 +378,8 @@ void calculate_flag_normals(float4 *data_pointer, float3 *flagNorms, int row, in
 	
 	int x = index%row;
 	int y = index/column;
-
+	
+	// normal of current particle
     float3 currNorm = make_float3(0.0f, 0.0f, 0.0f);
 
     if(x == 0 && y == 0)

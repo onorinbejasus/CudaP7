@@ -12,7 +12,7 @@
  //  Shaders.h
  //  Project4
  //  
- //  Created by Timothy Luciani on 2011-03-02.
+ //  Modified by Timothy Luciani on 2011-03-02.
  //  Copyright 2011 __MyCompanyName__. All rights reserved.
  // 
  

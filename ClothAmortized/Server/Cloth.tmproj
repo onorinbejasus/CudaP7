@@ -124,14 +124,14 @@
 			<key>caret</key>
 			<dict>
 				<key>column</key>
-				<integer>41</integer>
+				<integer>36</integer>
 				<key>line</key>
 				<integer>142</integer>
 			</dict>
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
-			<integer>123</integer>
+			<integer>120</integer>
 		</dict>
 		<key>main.d</key>
 		<dict>

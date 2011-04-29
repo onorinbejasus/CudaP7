@@ -161,31 +161,28 @@ void init_system(void)
 
 void draw_particles ( void )
 {
-    // Enable lighting
-    glEnable(GL_LIGHTING);
-
-	// Read from the socket
+	// Clear data pointer
 	memset(data_pointer, 0 ,sizeof(float) * size * 3);	
 	
+    // Do initial read
 	int n = 0;
-
 	writeline(sock, &vbo, sizeof(GLuint));
-
 	n = readline(sock, (float*)data_pointer, sizeof(float) * size * 3);
 
-	while(n < (sizeof(float) * size * 3)){
+    // Continue to read until finished reading data pointer
+	while(n < (sizeof(float) * size * 3))
+    {
 		n += readline(sock, (char*)data_pointer + n, (sizeof(float) * size * 3) - n);
-
 	}	
 
+    // Clear normals
     memset(flagNormArray, 0, sizeof(float) * size * 3);
 
+    // Do initial normal read
     n = 0;
-
-    writeline(sock, &normVbo, sizeof(GLuint));
-
     n = readline(sock, (float*)flagNormArray, sizeof(float) * size * 3);
 
+    // Continue to read until finished reading normals
     while(n < (sizeof(float) * size * 3))
     {
         n += readline(sock, (char*)flagNormArray + n, (sizeof(float) * size * 3) - n);
@@ -199,6 +196,8 @@ void draw_particles ( void )
     glBindBuffer(GL_ARRAY_BUFFER, normVbo);
     glBufferData(GL_ARRAY_BUFFER, sizeof(float) * size * 3, flagNormArray, GL_DYNAMIC_DRAW);
 	
+    // Enable texturing and lightings
+    glEnable(GL_LIGHTING);
 	glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, flagTexId);
 
@@ -206,6 +205,7 @@ void draw_particles ( void )
     glMaterialfv(GL_FRONT, GL_DIFFUSE, lightDiffuse);
     glMaterialfv(GL_FRONT, GL_SHININESS, lightShine);
 	
+    // Render particles
 	glPushMatrix();
 		glColor3f(1.0, 1.0, 1.0);
 		glTranslatef(0.0, 0.0, 0.0);
@@ -231,6 +231,7 @@ void draw_particles ( void )
 		glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 	glPopMatrix(); 
 	
+    // Disable texturing and lighting
 	glDisable(GL_TEXTURE_2D);
     glDisable(GL_LIGHTING);
 }

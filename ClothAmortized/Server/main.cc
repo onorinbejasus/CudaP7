@@ -98,7 +98,6 @@ int main(int argc, char **argv) {
 	initGL(argc, argv);
 	initCuda(argc, argv);
 
-
 	while(1){
 
 		fd_read = fd_all;

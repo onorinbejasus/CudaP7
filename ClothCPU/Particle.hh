@@ -15,7 +15,7 @@
 
 struct Particle
 {
-	Particle(){}
+	Particle(){} // default constructor
 	
 	Particle(const float3 & ConstructPos, float mass, float4 *data_pointer, int index, bool move) :
 			m_ConstructPos(ConstructPos), m_Position(ConstructPos), m_Old(ConstructPos),
@@ -24,7 +24,7 @@ struct Particle
 				data_pointer[index] = make_float4(m_ConstructPos, 1);
 			}	
 
-	void draw()
+	void draw() // draw particle
 	{
 		const double h = 0.005;
 		glColor3f(1.f, 0.f, 0.f); 

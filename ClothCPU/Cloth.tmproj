@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>currentDocument</key>
-	<string>main.cc</string>
+	<string>window.cc</string>
 	<key>documents</key>
 	<array>
 		<dict>
@@ -26,9 +26,9 @@
 			<key>caret</key>
 			<dict>
 				<key>column</key>
-				<integer>63</integer>
+				<integer>1</integer>
 				<key>line</key>
-				<integer>37</integer>
+				<integer>31</integer>
 			</dict>
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
@@ -54,14 +54,14 @@
 			<key>caret</key>
 			<dict>
 				<key>column</key>
-				<integer>1</integer>
+				<integer>29</integer>
 				<key>line</key>
-				<integer>81</integer>
+				<integer>26</integer>
 			</dict>
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
-			<integer>52</integer>
+			<integer>0</integer>
 		</dict>
 		<key>Shaders.cc</key>
 		<dict>
@@ -161,14 +161,28 @@
 			<key>firstVisibleLine</key>
 			<integer>0</integer>
 		</dict>
+		<key>imageio.hh</key>
+		<dict>
+			<key>caret</key>
+			<dict>
+				<key>column</key>
+				<integer>0</integer>
+				<key>line</key>
+				<integer>0</integer>
+			</dict>
+			<key>firstVisibleColumn</key>
+			<integer>0</integer>
+			<key>firstVisibleLine</key>
+			<integer>0</integer>
+		</dict>
 		<key>main.cc</key>
 		<dict>
 			<key>caret</key>
 			<dict>
 				<key>column</key>
-				<integer>21</integer>
+				<integer>34</integer>
 				<key>line</key>
-				<integer>193</integer>
+				<integer>123</integer>
 			</dict>
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
@@ -208,14 +222,14 @@
 			<key>caret</key>
 			<dict>
 				<key>column</key>
-				<integer>14</integer>
+				<integer>18</integer>
 				<key>line</key>
-				<integer>35</integer>
+				<integer>61</integer>
 			</dict>
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
-			<integer>0</integer>
+			<integer>341</integer>
 		</dict>
 		<key>setup.hh</key>
 		<dict>
@@ -243,7 +257,7 @@
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
-			<integer>122</integer>
+			<integer>9</integer>
 		</dict>
 		<key>window.hh</key>
 		<dict>
@@ -263,6 +277,7 @@
 	<key>openDocuments</key>
 	<array>
 		<string>cuda_helpers.hh</string>
+		<string>imageio.hh</string>
 		<string>window.cc</string>
 		<string>setup.cu</string>
 		<string>Solver.cu</string>

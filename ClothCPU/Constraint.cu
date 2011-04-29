@@ -22,12 +22,14 @@ void Constraint::satisfy(float4 *data_pointer){
 	float current_distance = length(p1_to_p2);
 	float3 correctionVector = p1_to_p2*(1 - m_rest/current_distance); 
 	float3 correctionVectorHalf = correctionVector*0.5; 
-	
+		
 	if(current_distance > m_rest){
 		
 		p1->updateVector(correctionVectorHalf, data_pointer); 
 		p2->updateVector(-correctionVectorHalf, data_pointer);
 	} // end if
+	
+	// pinned particle
 	
 	if(!p1->m_movable){
 		p1->m_Position = p1->m_ConstructPos;

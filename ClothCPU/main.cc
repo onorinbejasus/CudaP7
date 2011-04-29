@@ -106,22 +106,22 @@ void keyboard(
         case 'K':
             cameraSight -= 0.05;
             break;
-        case 'a':
+        case 'a': // move left
         case 'A':
             posX += movingSpeed/cameraSensitivity*sin(cameraViewAngle);
             posZ -= movingSpeed/cameraSensitivity*cos(cameraViewAngle);
             break;
-        case 'd':
+        case 'd': // move right
         case 'D':
             posX -= movingSpeed/cameraSensitivity*sin(cameraViewAngle);
             posZ += movingSpeed/cameraSensitivity*cos(cameraViewAngle);
             break;
-        case 'w':
+        case 'w': // move forward
         case 'W':
             posX += movingSpeed/cameraSensitivity*cos(cameraViewAngle);
             posZ += movingSpeed/cameraSensitivity*sin(cameraViewAngle);
             break;
-        case 's':
+        case 's': // move backward
         case 'S':
             posX -= movingSpeed/cameraSensitivity*cos(cameraViewAngle);
             posZ -= movingSpeed/cameraSensitivity*sin(cameraViewAngle);

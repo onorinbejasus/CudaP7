@@ -59,6 +59,7 @@ GLfloat lightColor[] = {1.0, 1.0, 1.0, 1.0};
 
 int size = row * column;
 
+// simulation step
 extern void verlet_simulation_step(struct Particle* pVector, std::vector<Constraint*> constraints, 
 												float4 *data_pointer, GLuint vbo, int row, int column, bool wind, int numCloths);
 void deleteVBO(int numCloth);

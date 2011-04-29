@@ -289,12 +289,12 @@ void init_system(void)
 	 ******************************/
 	 
 	 // Enable lighting
-	 glEnable(GL_LIGHTING);
-	 glEnable(GL_LIGHT0);
+	 // glEnable(GL_LIGHTING);
+	 // glEnable(GL_LIGHT0);
 	 
 	 // Set light position
-	 glLightfv(GL_LIGHT0, GL_POSITION, lightPos);
-	 glLightfv(GL_LIGHT0, GL_SPECULAR, lightColor);
+	 // glLightfv(GL_LIGHT0, GL_POSITION, lightPos);
+	 // glLightfv(GL_LIGHT0, GL_SPECULAR, lightColor);
 }
 
 

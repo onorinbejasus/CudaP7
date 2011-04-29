@@ -22,18 +22,10 @@
 // Socket for networking to server
 int sock;
 
-int numCloths;
-
-static bool right_click = false;
-static bool left_click = false;
-
 // Camera variables
 GLfloat posX, posY, posZ;
 GLfloat cameraViewAngle, cameraSight;
 GLfloat cameraSensitivity;
-
-bool dsim = false;
-bool wind = false;
 
 /// The display callback.
 void display()
@@ -63,23 +55,27 @@ void display()
               cos(cameraSight),
               sin(cameraViewAngle) * (-sin(cameraSight)));
 		
+    // Render the particles
     glPushMatrix();
     glTranslatef(-2.0f, 3.0f, -13.0f);
 	draw_particles();
     glPopMatrix();
 
-	glutSwapBuffers ();
+    // Swap buffers
+	glutSwapBuffers();
 	
+    // Flush
 	glutPostRedisplay();
 }
 
 void reshape(int width, int height) {
 	glViewport(0, 0, width, height);
 
-    // set the view matrix
+    // Set the modelview matrix
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 
+    // Set the projection matrix
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     gluPerspective(45.0, 1.0, 0.1, 100.0);
@@ -93,6 +89,7 @@ void keyboard(
 	int x,				///< x coordinate of the mouse
 	int y)				///< y coordinate of the mouse
 {
+    // 'w', 'a', 's', 'd', 'q' and 'e' to move and 'i', 'j', 'k' and 'l' to look around
 	switch (key)
 	{
         case 'j':
@@ -132,11 +129,9 @@ void keyboard(
             posZ -= movingSpeed/cameraSensitivity*sin(cameraViewAngle);
             break;
 		case ' ':
-			dsim = !dsim;
 			break;
 		case 'z':
 		case 'Z':
-			wind = !wind;
 			break;
         case 'p':
         case 'P':
@@ -195,15 +190,16 @@ int main(int argc, char **argv) {
     cameraSight = 0.0;
     cameraSensitivity = 40.0;
 	
+    // Make sure that ip address and port number are given
 	if(argc < 3){
         printf("Need ip address and port number\n");
         exit(EXIT_FAILURE);
     }
 	
+    // Connect to server
 	int port = atoi(argv[2]);
 	char ip[20];
 	strcpy(ip, argv[1]);
-	
 	sock = serv_connect(ip, port);
 	
 	if(sock < 0){
@@ -211,8 +207,7 @@ int main(int argc, char **argv) {
 		exit(EXIT_FAILURE);
 	}
 	
-    numCloths = 1;
-
+    // Start main loop
 	createWindow(argc, argv);
 	startApplication(argc, argv);
 	return 0;

@@ -28,7 +28,12 @@
 
 #include <stdlib.h>
 // #include <tiffio.h>
+
+#ifdef __APPLE__
 #include </usr/X11/include/png.h>
+#else
+#include <png.h>
+#endif
 
 //
 // COMPILATION

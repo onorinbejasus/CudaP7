@@ -31,16 +31,6 @@ int getParticle(int x, int y, int row){ return y*row+x; }
 
 /* find the normal of a triangle */
 __device__
-float3 triangle_normal(float4 v1, float4 v2, float4 v3)
-{
-    float3 myV1 = make_float3(v1.x, v1.y, v1.z);
-    float3 myV2 = make_float3(v2.x, v2.y, v2.z);
-    float3 myV3 = make_float3(v3.x, v3.y, v3.z);
-    
-    return (cross(myV3-myV1, myV2-myV1));
-}
-
-__device__
 float3  triangle_normal(int v1, int v2, int v3, float *points)
 {
 	float3 p1 = make_float3(points[v1*3 + 0], points[v1*3 + 1], points[v1*3 + 2]);
@@ -478,6 +468,7 @@ void calculate_flag_normals(float *data_pointer, float *flagNorms, int row, int 
         currNorm += triangle_normal(index, index+1, index-column+1, data_pointer);
     }
 
+    // Normalize the normal of this vertex and write it to normal pointer
 	currNorm = normalize(currNorm);
     flagNorms[index*3 + 0] = currNorm.x;
 	flagNorms[index*3 + 1] = currNorm.y;
@@ -496,10 +487,12 @@ void verlet_simulation_step(struct Particle* pVector, float *data_pointer, float
 		
 	cudaThreadSynchronize();
 					
+    // Satisfy constraints
  	satisfy<<<nBlocks, threadsPerBlock>>>(pVector, data_pointer, row, column);
 
 	cudaThreadSynchronize();
 	
+    // Calculate flag normals
 	calculate_flag_normals<<<nBlocks, threadsPerBlock>>>(data_pointer, norms, row, column);
 	
 	cudaThreadSynchronize();

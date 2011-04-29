@@ -34,7 +34,7 @@
 extern int numCloths;
 
 const int threadsPerBlock = 256;
-extern void verlet_simulation_step(struct Particle* pVector, float *data_pointer, bool wind, int row, int column);
+extern void verlet_simulation_step(struct Particle* pVector, float *data_pointer, float *norms, bool wind, int row, int column);
 
 int row	  = 40;
 int column = 40;
@@ -43,11 +43,16 @@ unsigned int numTriangles = (row-1)*(column-1)*2;
 int width = 8;
 int height = 4;
 
+int texWidth;
+int texHeight;
+
 struct Particle* pVector;
 
 unsigned int *flagIndexArray;
 float *data_pointer;
 float *gpuData_pointer;
+float *flagNormals;
+float *gpuFlagNormals;
 
 float *flagTexArray;
 GLuint flagTexId;
@@ -80,6 +85,11 @@ unsigned char *get_flagTexData() {
 	return data;
 }
 
+float *get_flagNormals()
+{
+    return flagNormals;
+}
+
 /*----------------------------------------------------------------------
 free/clear/allocate simulation data
 ----------------------------------------------------------------------*/
@@ -91,13 +101,14 @@ void free_data ( void )
 	free(data);
     free(flagIndexArray);
     free(flagTexArray);
+    free(flagNormals);
 }
 
 /*--------------------------------------------------------------------
 					Make Particles
 --------------------------------------------------------------------*/
 __global__
-void make_particles(struct Particle *pVector, float *data_pointer, int row, int column, int width, int height)
+void make_particles(struct Particle *pVector, float *data_pointer, float *norms, int row, int column, int width, int height)
 {
 	// //calculate the unique thread index
 	int index = blockIdx.x * blockDim.x + threadIdx.x;
@@ -108,9 +119,9 @@ void make_particles(struct Particle *pVector, float *data_pointer, int row, int 
 	float3 pos = make_float3(width * (i/(float)row), -height * (j/(float)column), 0);
 	
 	if((j == 0 && i == 0) || (i == 0 && j == column-1))
-		pVector[getParticleInd(i,j,row)] = Particle(pos, 1, data_pointer, getParticleInd(i,j, row), false);
+		pVector[getParticleInd(i,j,row)] = Particle(pos, 1, data_pointer, norms, getParticleInd(i,j, row), false);
 	else
-		pVector[getParticleInd(i,j,row)] = Particle(pos, 1, data_pointer, getParticleInd(i,j, row), true);
+		pVector[getParticleInd(i,j,row)] = Particle(pos, 1, data_pointer, norms, getParticleInd(i,j, row), true);
 	
 } // end make particles
 
@@ -167,6 +178,9 @@ void init_system(void)
     data_pointer = (float*)malloc(sizeof(float) * size * 3);
 	cudaMalloc((void**)&gpuData_pointer, sizeof(float) * size * 3);
 	
+    flagNormals = (float*)malloc(sizeof(float) * size * 3);
+    cudaMalloc((void**)&gpuFlagNormals, sizeof(float) * size * 3);
+
 	cudaMalloc( (void**)&(pVector), size * sizeof(struct Particle) );
 	   
     /* create and copy */
@@ -174,9 +188,10 @@ void init_system(void)
     int nBlocks = totalThreads/threadsPerBlock;
     nBlocks += ((totalThreads % threadsPerBlock) > 0) ? 1 : 0;
 
-    make_particles<<<nBlocks, threadsPerBlock>>>(pVector, gpuData_pointer, row, column, width, height); // create particles
+    make_particles<<<nBlocks, threadsPerBlock>>>(pVector, gpuData_pointer, gpuFlagNormals, row, column, width, height); // create particles
 
 	cudaMemcpy(data_pointer, gpuData_pointer, sizeof(float) * size * 3, cudaMemcpyDeviceToHost);
+	cudaMemcpy(flagNormals, gpuFlagNormals, sizeof(float) * size * 3, cudaMemcpyDeviceToHost);
 
     cudaThreadSynchronize();
 	
@@ -189,14 +204,13 @@ void init_system(void)
     make_flag_mesh();
 
     const char *flagTextureFilename = "Textures/american_flag.png";
-    int w, h;
-    data = loadImageRGBA(flagTextureFilename, &w, &h);
+    data = loadImageRGBA(flagTextureFilename, &texWidth, &texHeight);
 }
 /*----------------------------------------------------------------------
 relates mouse movements to tinker toy construction
 ----------------------------------------------------------------------*/
 __global__
-void remap_GUI(struct Particle *pVector, float *data_pointer)
+void remap_GUI(struct Particle *pVector, float *data_pointer, float *norms)
 {	
 	// //calculate the unique thread index
 	int index = blockIdx.x * blockDim.x + threadIdx.x;
@@ -205,14 +219,18 @@ void remap_GUI(struct Particle *pVector, float *data_pointer)
 	data_pointer[index * 3 + 0] = pVector[index].m_ConstructPos.x;
 	data_pointer[index * 3 + 1] = pVector[index].m_ConstructPos.y;
 	data_pointer[index * 3 + 2] = pVector[index].m_ConstructPos.z;
-	
+
+    norms[index * 3 + 0] = 0.0f;
+    norms[index * 3 + 1] = 0.0f;
+    norms[index * 3 + 2] = 0.0f;
 }
 
 void step_func ( )
 {
  	if ( dsim ){ // simulate
-	    verlet_simulation_step(pVector, gpuData_pointer, wind, row, column);
+	    verlet_simulation_step(pVector, gpuData_pointer, gpuFlagNormals, wind, row, column);
 		cudaMemcpy(data_pointer, gpuData_pointer, sizeof(float) * size * 3, cudaMemcpyDeviceToHost);
+		cudaMemcpy(flagNormals, gpuFlagNormals, sizeof(float) * size * 3, cudaMemcpyDeviceToHost);
 	}
     else { // remap
 
@@ -220,8 +238,9 @@ void step_func ( )
 	    int nBlocks = totalThreads/threadsPerBlock;
 	    nBlocks += ((totalThreads % threadsPerBlock) > 0) ? 1 : 0;
 	
-	    remap_GUI<<<nBlocks, threadsPerBlock>>>(pVector, gpuData_pointer);
+	    remap_GUI<<<nBlocks, threadsPerBlock>>>(pVector, gpuData_pointer, gpuFlagNormals);
 		cudaMemcpy(data_pointer, gpuData_pointer, sizeof(float) * size * 3, cudaMemcpyDeviceToHost);
+		cudaMemcpy(flagNormals, gpuFlagNormals, sizeof(float) * size * 3, cudaMemcpyDeviceToHost);
 		
          cudaThreadSynchronize();
     }

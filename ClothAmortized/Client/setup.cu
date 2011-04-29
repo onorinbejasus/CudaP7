@@ -41,15 +41,24 @@ int row	  = 40;
 int column = 40;
 unsigned int numTriangles = (row-1)*(column-1)*2;
 
+// Lighting attributes
+GLfloat lightPos[] = {3.0, 5.0, -4.0, 0.0};
+GLfloat lightColor[] = {1.0, 1.0, 1.0, 1.0};
+GLfloat lightSpecular[] = {1.0, 1.0, 1.0, 1.0};
+GLfloat lightDiffuse[] = {1.0, 1.0, 1.0, 1.0};
+GLfloat lightShine[] = {20.0};
+
 GLuint flagTexId;
 
 GLuint vbo;
 GLuint indexVbo;
 GLuint texVbo;
+GLuint normVbo;
 
 unsigned int *flagIndexArray;
 float *data_pointer;
 float *flagTexArray;
+float *flagNormArray;
 
 int size = row * column;
 
@@ -61,10 +70,12 @@ void free_data ( void )
     glDeleteBuffers(1, &indexVbo);
     glDeleteBuffers(1, &vbo);
 	glDeleteBuffers(1, &texVbo);
+    glDeleteBuffers(1, &normVbo);
 	
 	free(data_pointer);
     free(flagIndexArray);
 	free(flagTexArray);
+    free(flagNormArray);
 }
 
 /*--------------------------------------------------------------------
@@ -121,6 +132,26 @@ void init_system(void)
 	// data_pointer initialize
 	data_pointer = (float*)malloc(sizeof(float) * size * 3);
 	glGenBuffers(1, &vbo);
+
+    // flagNormals initialize
+    flagNormArray = (float*)malloc(sizeof(float) * size * 3);
+    glGenBuffers(1, &normVbo);
+
+    /*******************
+     * Lighting stuff
+     * ****************/
+
+    // Enable depth testing
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_NORMALIZE);
+
+    // Enable lighting
+    glEnable(GL_LIGHTING);
+    glEnable(GL_LIGHT0);
+
+    // Set the light color and position
+    glLightfv(GL_LIGHT0, GL_POSITION, lightPos);
+    glLightfv(GL_LIGHT0, GL_POSITION, lightColor);
 }
 
 
@@ -130,8 +161,10 @@ void init_system(void)
 
 void draw_particles ( void )
 {
-	// Read from the socket
+    // Enable lighting
+    glEnable(GL_LIGHTING);
 
+	// Read from the socket
 	memset(data_pointer, 0 ,sizeof(float) * size * 3);	
 	
 	int n = 0;
@@ -145,12 +178,33 @@ void draw_particles ( void )
 
 	}	
 
+    memset(flagNormArray, 0, sizeof(float) * size * 3);
+
+    n = 0;
+
+    writeline(sock, &normVbo, sizeof(GLuint));
+
+    n = readline(sock, (float*)flagNormArray, sizeof(float) * size * 3);
+
+    while(n < (sizeof(float) * size * 3))
+    {
+        n += readline(sock, (char*)flagNormArray + n, (sizeof(float) * size * 3) - n);
+    }
+
 	// Map to VBO
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * size * 3, data_pointer, GL_DYNAMIC_DRAW);
+
+    // Map to normal VBO
+    glBindBuffer(GL_ARRAY_BUFFER, normVbo);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * size * 3, flagNormArray, GL_DYNAMIC_DRAW);
 	
 	glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, flagTexId);
+
+    glMaterialfv(GL_FRONT, GL_SPECULAR, lightSpecular);
+    glMaterialfv(GL_FRONT, GL_DIFFUSE, lightDiffuse);
+    glMaterialfv(GL_FRONT, GL_SHININESS, lightShine);
 	
 	glPushMatrix();
 		glColor3f(1.0, 1.0, 1.0);
@@ -160,8 +214,11 @@ void draw_particles ( void )
 		glVertexPointer(3, GL_FLOAT, 0, 0);
 		glBindBuffer(GL_ARRAY_BUFFER, texVbo);
 		glTexCoordPointer(2, GL_FLOAT, 0, 0);
+        glBindBuffer(GL_ARRAY_BUFFER, normVbo);
+        glNormalPointer(GL_FLOAT, 0, 0);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexVbo);
 		glEnableClientState(GL_VERTEX_ARRAY);
+        glEnableClientState(GL_NORMAL_ARRAY);
 		glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 		
 		glDrawElements(GL_TRIANGLES, numTriangles * 3, GL_UNSIGNED_INT, 0);
@@ -170,8 +227,10 @@ void draw_particles ( void )
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 		
 		glDisableClientState(GL_VERTEX_ARRAY);
+        glDisableClientState(GL_NORMAL_ARRAY);
 		glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 	glPopMatrix(); 
 	
 	glDisable(GL_TEXTURE_2D);
+    glDisable(GL_LIGHTING);
 }

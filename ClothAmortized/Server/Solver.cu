@@ -30,6 +30,25 @@ __device__ __host__
 int getParticle(int x, int y, int row){ return y*row+x; }
 
 /* find the normal of a triangle */
+__device__
+float3 triangle_normal(float4 v1, float4 v2, float4 v3)
+{
+    float3 myV1 = make_float3(v1.x, v1.y, v1.z);
+    float3 myV2 = make_float3(v2.x, v2.y, v2.z);
+    float3 myV3 = make_float3(v3.x, v3.y, v3.z);
+    
+    return (cross(myV3-myV1, myV2-myV1));
+}
+
+__device__
+float3  triangle_normal(int v1, int v2, int v3, float *points)
+{
+	float3 p1 = make_float3(points[v1*3 + 0], points[v1*3 + 1], points[v1*3 + 2]);
+	float3 p2 = make_float3(points[v2*3 + 0], points[v2*3 + 1], points[v2*3 + 2]);
+	float3 p3 = make_float3(points[v3*3 + 0], points[v3*3 + 1], points[v3*3 + 2]);
+	
+	return (cross(p2-p1, p3-p1));
+}
 
 __device__
 float3 triangle_normal(float3 v1, float3 v2, float3 v3){ return ( cross(v2-v1, v3-v1) ); }
@@ -386,7 +405,86 @@ void satisfy(struct Particle *pVector, float *data_pointer, int row, int column)
 	}
 }
 
-void verlet_simulation_step(struct Particle* pVector, float *data_pointer, bool wind, int row, int column){
+__global__
+void calculate_flag_normals(float *data_pointer, float *flagNorms, int row, int column)
+{
+	// calculate the unique thread index
+	int index = blockIdx.x * blockDim.x + threadIdx.x;
+	
+	int x = index%row;
+	int y = index/column;
+	
+	// normal of current particle
+    float3 currNorm = make_float3(0.0f, 0.0f, 0.0f);
+
+    if(x == 0 && y == 0)
+    {
+        // Top Left
+        currNorm += triangle_normal(index, index+column, index+1, data_pointer);
+    }
+    else if(x == (column-1) && y == 0)
+    {
+        // Top Right
+        currNorm += triangle_normal(index, index-1, index+column-1, data_pointer);
+        currNorm += triangle_normal(index, index+column-1, index+column, data_pointer);
+    }
+    else if(x == 0 && y == (column-1))
+    {
+        // Bottom Left
+        currNorm += triangle_normal(index, index-column+1, index-column, data_pointer);
+        currNorm += triangle_normal(index, index+1, index-column+1, data_pointer);
+    }
+    else if(x == (row-1) && y == (column-1))
+    {
+        // Bottom Right
+        currNorm += triangle_normal(index, index-column, index-1, data_pointer);
+    }
+    else if(y == 0)
+    {
+        // Top row
+        currNorm += triangle_normal(index, index-1, index+column-1, data_pointer);
+        currNorm += triangle_normal(index, index+column-1, index+column, data_pointer);
+        currNorm += triangle_normal(index, index+column, index+1, data_pointer);
+    }
+    else if(y == (column-1))
+    {
+        // Bottom row
+        currNorm += triangle_normal(index, index-column, index-1, data_pointer);
+        currNorm += triangle_normal(index, index-column+1, index-column, data_pointer);
+        currNorm += triangle_normal(index, index+1, index-column+1, data_pointer);
+    }
+    else if(x == 0)
+    {
+        // Left column
+        currNorm += triangle_normal(index, index-column+1, index-column, data_pointer);
+        currNorm += triangle_normal(index, index+1, index-column+1, data_pointer);
+        currNorm += triangle_normal(index, index+column, index+1, data_pointer);
+    }
+    else if(x == (row-1))
+    {
+        // Right column 
+        currNorm += triangle_normal(index, index-column, index-1, data_pointer);
+        currNorm += triangle_normal(index, index-1, index+column-1, data_pointer);
+        currNorm += triangle_normal(index, index+column-1, index+column, data_pointer);
+    }
+    else
+    {
+        // Middle vertex that touches six faces
+        currNorm += triangle_normal(index, index-1, index+column-1, data_pointer);
+        currNorm += triangle_normal(index, index+column-1, index+column, data_pointer);
+        currNorm += triangle_normal(index, index+column, index+1, data_pointer);
+		currNorm += triangle_normal(index, index-column, index-1, data_pointer);
+        currNorm += triangle_normal(index, index-column+1, index-column, data_pointer);
+        currNorm += triangle_normal(index, index+1, index-column+1, data_pointer);
+    }
+
+	currNorm = normalize(currNorm);
+    flagNorms[index*3 + 0] = currNorm.x;
+	flagNorms[index*3 + 1] = currNorm.y;
+	flagNorms[index*3 + 2] = currNorm.z;
+}
+
+void verlet_simulation_step(struct Particle* pVector, float *data_pointer, float *norms, bool wind, int row, int column){
 				
 	/* set up number of threads to run */	
 	int totalThreads = row * column;
@@ -400,6 +498,10 @@ void verlet_simulation_step(struct Particle* pVector, float *data_pointer, bool 
 					
  	satisfy<<<nBlocks, threadsPerBlock>>>(pVector, data_pointer, row, column);
 
+	cudaThreadSynchronize();
+	
+	calculate_flag_normals<<<nBlocks, threadsPerBlock>>>(data_pointer, norms, row, column);
+	
 	cudaThreadSynchronize();
 				
 } // end sim step

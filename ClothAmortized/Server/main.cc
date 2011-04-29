@@ -46,16 +46,21 @@ extern float *get_dataPtr();
 extern uint *get_indexPtr();
 extern float *get_flagTexArray();
 extern unsigned char *get_flagTexData();
+extern float *get_flagNormals();
 
 extern uint numTriangles;
 
 extern int size;
+extern int texWidth;
+extern int texHeight;
 
 void handle_clients_line(int client){
 
 	float *data = get_dataPtr();
+    float *normData = get_flagNormals();
 
 	writeline( clients[client].fd, (float*)data, sizeof(float) * size * 3);
+	writeline( clients[client].fd, (float*)normData, sizeof(float) * size * 3);
 }
 
 int main(int argc, char **argv) {
@@ -124,13 +129,6 @@ int main(int argc, char **argv) {
 			indices = get_indexPtr();
 			writeline( clients[num_clients].fd, (uint*)indices, sizeof(uint) * numTriangles * 3);
 
-			// Send texture data
-			/* const char *texData;
-			texData = (const char *)get_flagTexData();
-			int sizeOfData = sizeof(texData);
-			send( clients[num_clients].fd, &sizeOfData, sizeof(int), 0);
-			send( clients[num_clients].fd, (char*)texData, sizeOfData, 0); */
-
 			// Send texture coordinates
 			float *texArray;
 			texArray = get_flagTexArray();
@@ -139,9 +137,6 @@ int main(int argc, char **argv) {
 			num_clients++;
 		}
 		for(i=0; i<num_clients; i++){
-
-			printf("client: %i\n", clients[i].fd);
-
 			if(FD_ISSET(clients[i].fd, &fd_read)){
 				if((recv_length = recv(clients[i].fd, clients[i].inbuf, MAX_LINE+1, 0)) == 0){
 					close(clients[i].fd);

@@ -19,13 +19,16 @@ __device__
 	Particle(){}
 	
  __device__
-	Particle(const float3 & ConstructPos, float mass, float *data_pointer, int index, bool move) :
+	Particle(const float3 & ConstructPos, float mass, float *data_pointer, float *norms, int index, bool move) :
 			m_ConstructPos(ConstructPos), m_Position(ConstructPos), m_Old(ConstructPos),
 			m_normal(make_float3(0.0f)), m_forces(make_float3(0.0f)), m_mass(mass), m_index(index), m_movable(move) {
 				
-				data_pointer[(index * 3)+ 0] = m_ConstructPos.x;
-				data_pointer[(index *3) + 1] = m_ConstructPos.y;
-				data_pointer[(index *3) + 2] = m_ConstructPos.z;		
+				data_pointer[(index * 3) + 0] = m_ConstructPos.x;
+				data_pointer[(index * 3) + 1] = m_ConstructPos.y;
+				data_pointer[(index * 3) + 2] = m_ConstructPos.z;		
+                norms[(index * 3) + 0] = 0.0f;
+                norms[(index * 3) + 1] = 0.0f;
+                norms[(index * 3) + 2] = 0.0f;
 			}	
 					
 __device__ __host__ 

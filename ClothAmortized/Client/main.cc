@@ -211,12 +211,6 @@ int main(int argc, char **argv) {
 		exit(EXIT_FAILURE);
 	}
 	
-	// Get init information from server
-	
-	// Row and Column data
-	// Texture data
-	// Index data
-
     numCloths = 1;
 
 	createWindow(argc, argv);

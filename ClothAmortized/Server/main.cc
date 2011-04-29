@@ -56,9 +56,11 @@ extern int texHeight;
 
 void handle_clients_line(int client){
 
+    // Grab normal and position pointers
 	float *data = get_dataPtr();
     float *normData = get_flagNormals();
 
+    // Write to client
 	writeline( clients[client].fd, (float*)data, sizeof(float) * size * 3);
 	writeline( clients[client].fd, (float*)normData, sizeof(float) * size * 3);
 }
@@ -144,12 +146,13 @@ int main(int argc, char **argv) {
 					printf("Client Removed\n");
 
 				}else{
+                    // Handle client's read request
 					handle_clients_line(i);
-
 				}
 			}
 		}
 
+        // Run the step function for the simulation
 		step_func();
 	}
 

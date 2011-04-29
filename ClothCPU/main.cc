@@ -24,8 +24,8 @@ GLfloat posX, posY, posZ;
 GLfloat cameraViewAngle, cameraSight;
 GLfloat cameraSensitivity;
 
-bool dsim = false;
-bool wind = false;
+bool dsim = true;
+bool wind = true;
 
 /// The display callback.
 void display()
